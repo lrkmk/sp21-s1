@@ -109,16 +109,66 @@ public class Model extends Observable {
     public boolean tilt(Side side) {
         boolean changed;
         changed = false;
-
+        this.board.setViewingPerspective(side);
         // TODO: Modify this.board (and perhaps this.score) to account
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
+        int size = this.board.size();
+        for(int i = 0; i < size; i+=1){
+            if (updateSingleColumn(i, size - 1, size)) {
+                changed = true;
+            }
+        }
 
         checkGameOver();
         if (changed) {
             setChanged();
         }
+        this.board.setViewingPerspective(Side.NORTH);
         return changed;
+    }
+
+    public boolean updateSingleColumn(int col, int row, int size) {
+        boolean flag = false;
+        for (int i = row -1 ; i >= 0; i -= 1) {
+            int target = desiredRow(col, i, size);
+            if (target > 0) {
+                Tile t = this.board.tile(col, i);
+                if (this.board.move(col, i + target, t)) {
+                    size -= 1;
+                }
+                flag = true;
+            }
+        }
+        return flag;
+    }
+
+    public int desiredRow(int col, int row, int size) {
+        if (this.board.tile(col, row) == null) {
+            return -1;
+        }
+        if (this.board.tile(col, row+1) == null) {
+            return 1 + searchDepth(col, row+1, size, this.board.tile(col, row).value());
+        } else if (this.board.tile(col, row+1).value() == this.board.tile(col, row).value()){
+            this.score += 2 * this.board.tile(col, row).value();
+            return 1;
+        } else {
+            return -1;
+        }
+    }
+
+    public int searchDepth(int col, int row, int size, int val) {
+        int depth = 0;
+        for (int i = row + 1; i < size; i+=1) {
+            if (this.board.tile(col, i) == null){
+                depth += 1;
+            } else if (this.board.tile(col, i).value() == val) {
+                depth += 1;
+                this.score += 2 * val;
+                break;
+            }
+        }
+        return depth;
     }
 
     /** Checks if the game is over and sets the gameOver variable
@@ -138,6 +188,14 @@ public class Model extends Observable {
      * */
     public static boolean emptySpaceExists(Board b) {
         // TODO: Fill in this function.
+        int size = b.size();
+        for(int i = 0; i < size; i+=1){
+            for(int j = 0; j < size; j+=1){
+                if(b.tile(i, j) == null){
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
@@ -148,6 +206,16 @@ public class Model extends Observable {
      */
     public static boolean maxTileExists(Board b) {
         // TODO: Fill in this function.
+        int size = b.size();
+        for(int i = 0; i < size; i+=1){
+            for(int j = 0; j < size; j+=1){
+                if(b.tile(i, j) != null){
+                    if(b.tile(i, j).value() == MAX_PIECE){
+                        return true;
+                    }
+                }
+            }
+        }
         return false;
     }
 
@@ -159,9 +227,30 @@ public class Model extends Observable {
      */
     public static boolean atLeastOneMoveExists(Board b) {
         // TODO: Fill in this function.
-        return false;
+        if (emptySpaceExists(b)) {
+            return true;
+        } else return checkAdjacentSame(b);
     }
 
+    private static boolean checkAdjacentSame(Board b) {
+        int size = b.size();
+        int dir = 1;
+        for(int i = 0; i < size - 1; i+=1){
+            for(int j = 0; j < size; j+=1){
+                if(b.tile(i, j).value() == b.tile(i+dir, j).value()){
+                    return true;
+                }
+            }
+        }
+        for(int i = 0; i < size; i+=1){
+            for(int j = 0; j < size - 1; j+=1){
+                if(b.tile(i, j).value() == b.tile(i, j+dir).value()){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     @Override
      /** Returns the model as a string, used for debugging. */
