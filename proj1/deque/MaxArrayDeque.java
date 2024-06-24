@@ -1,15 +1,24 @@
 package deque;
 
-public class ArrayDeque<T> implements Deque<T>{
+import java.util.Comparator;
+
+public class MaxArrayDeque<T> {
 
     private T[] array;
     private int size;
     private int next_first = 0;
     private int next_last = 1;
+    private Comparator<T> comp;
 
-    public ArrayDeque() {
+    public MaxArrayDeque() {
         size = 0;
         array = (T[]) new Object[8];
+    }
+
+    public MaxArrayDeque(Comparator<T> c) {
+        size = 0;
+        array = (T[]) new Object[8];
+        comp = c;
     }
 
     private void resize(int capacity) {
@@ -22,7 +31,7 @@ public class ArrayDeque<T> implements Deque<T>{
         next_last = size;
     }
 
-    @Override
+
     public void addFirst(T item) {
         if (size == array.length) {
             resize(size * 2);
@@ -36,7 +45,6 @@ public class ArrayDeque<T> implements Deque<T>{
         }
     }
 
-    @Override
     public void addLast(T item) {
         if (size == array.length) {
             resize(size * 2);
@@ -46,7 +54,6 @@ public class ArrayDeque<T> implements Deque<T>{
         next_last = (next_last + 1) % array.length;
     }
 
-    @Override
     public T removeFirst() {
         if (!isEmpty()) {
             next_first = (next_first + 1) % array.length;  // Update next_first before accessing
@@ -61,7 +68,6 @@ public class ArrayDeque<T> implements Deque<T>{
         return null;
     }
 
-    @Override
     public T removeLast() {
         if (!isEmpty()) {
             next_last = (next_last - 1 + array.length) % array.length;  // Update next_last before accessing
@@ -77,18 +83,15 @@ public class ArrayDeque<T> implements Deque<T>{
     }
 
 
-    @Override
     public T get(int index) {
         return array[(next_first+index+1)% array.length];
     }
 
-    @Override
     public int size() {
         return size;
     }
 
 
-    @Override
     public void printDeque() {
         for(int i = 0 ; i < size; i++){
             System.out.print(array[(next_first+i+1)%array.length]);
@@ -97,8 +100,40 @@ public class ArrayDeque<T> implements Deque<T>{
         System.out.println();
     }
 
+    public T max() {
+        if(isEmpty()) {
+            return null;
+        }
+        T max_val = array[(next_first+1)%array.length];
+        for (int i = 0; i < size; i++) {
+            T next = array[(next_first+i+1)%array.length];
+            if (comp.compare(max_val,next) < 0) {
+                max_val = next;
+            }
+        }
+        return max_val;
+    }
+
+    public T max(Comparator<T> c) {
+        if(isEmpty()) {
+            return null;
+        }
+        T max_val = array[(next_first+1)%array.length];
+        for (int i = 0; i < size; i++) {
+            T next = array[(next_first+i+1)%array.length];
+            if (c.compare(max_val,next) < 0) {
+                max_val = next;
+            }
+        }
+        return max_val;
+    }
+
+    public boolean isEmpty() {
+        return size() == 0;
+    }
+
 //    public static void main(String[] args) {
-//        ArrayDeque<Integer> deq = new ArrayDeque<Integer>();
+//       MaxArrayDeque<Integer> deq = new MaxArrayDeque<Integer>();
 //        deq.addFirst(1);
 //        deq.addFirst(2);
 //        deq.addFirst(3);
@@ -109,5 +144,7 @@ public class ArrayDeque<T> implements Deque<T>{
 //        deq.addFirst(8);
 //        deq.addFirst(9);
 //        deq.printDeque();
+//        Comparator<Integer> c = (Integer a, Integer b) -> a - b;
+//        System.out.println(deq.max(c));
 //    }
 }

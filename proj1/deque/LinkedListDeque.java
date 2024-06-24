@@ -1,6 +1,6 @@
 package deque;
 
-public class LinkedListDeque<T> {
+public class LinkedListDeque<T> implements Deque<T>{
 
     private Node sentinel;
     private int size;
@@ -32,10 +32,12 @@ public class LinkedListDeque<T> {
         size = 1;
     }
 
+    @Override
     public boolean isEmpty() {
         return size == 0;
     }
 
+    @Override
     public void addFirst(T item) {
         Node new_node = new Node(item);
         new_node._next = sentinel._next;
@@ -45,6 +47,7 @@ public class LinkedListDeque<T> {
         size++;
     }
 
+    @Override
     public T removeFirst() {
         T return_val = sentinel._next._item;
         if (!isEmpty()) {
@@ -55,6 +58,7 @@ public class LinkedListDeque<T> {
         return return_val;
     }
 
+    @Override
     public void addLast(T item) {
         Node new_node = new Node(item);
         sentinel._prev._next = new_node;
@@ -64,6 +68,7 @@ public class LinkedListDeque<T> {
         size++;
     }
 
+    @Override
     public T removeLast() {
         T return_val = sentinel._prev._item;
         if (!isEmpty()) {
@@ -74,6 +79,7 @@ public class LinkedListDeque<T> {
         return return_val;
     }
 
+    @Override
     public void printDeque() {
         Node curr = sentinel._next;
         while(curr != sentinel) {
@@ -84,10 +90,12 @@ public class LinkedListDeque<T> {
         System.out.println();
     }
 
+    @Override
     public int size() {
         return size;
     }
 
+    @Override
     public T get(int index) {
         Node curr = sentinel;
         for(int i = 0; i < index + 1; i++) {
@@ -100,7 +108,7 @@ public class LinkedListDeque<T> {
         return getRecursiveNode(index)._item;
     }
 
-    public Node getRecursiveNode(int index) {
+    private Node getRecursiveNode(int index) {
         if (index == 0) {
             return sentinel._next;
         } else {
