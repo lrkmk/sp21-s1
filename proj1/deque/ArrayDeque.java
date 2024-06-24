@@ -13,13 +13,23 @@ public class ArrayDeque<T> {
     }
 
     private void resize(int capacity) {
-        next_last = array.length - 1;
-        T[] arr = (T[]) new Object[capacity];
-        for (int i = 0; i < size; i++) {
-            arr[i] = array[(i+next_first+1)%array.length];
+        if(capacity > array.length) {
+            next_last = array.length;
+            T[] arr = (T[]) new Object[capacity];
+            for (int i = 0; i < size; i++) {
+                arr[i] = array[(i+next_first+1)%array.length];
+            }
+            array = arr;
+            next_first = array.length - 1;
+        } else {
+            next_first = array.length / 2;
+            T[] arr = (T[]) new Object[capacity];
+            for (int i = 0; i < size; i++) {
+                arr[i] = array[(i+next_first+1)%array.length];
+            }
+            array = arr;
         }
-        array = arr;
-        next_first = array.length - 1;
+
     }
 
     public void addFirst(T item) {
@@ -38,7 +48,6 @@ public class ArrayDeque<T> {
     public void addLast(T item) {
         if (size == array.length) {
             resize(size * 2);
-            size *= 2;
         }
         array[next_last] = item;
         size++;
@@ -46,29 +55,35 @@ public class ArrayDeque<T> {
     }
 
     public T removeFirst() {
-        T return_val = array[next_first+1];
-        array[next_first+1] = null;
-        size--;
-        next_first = (next_first + 1) % array.length;
-        if((double) size / array.length < 0.25) {
-            resize(size/2);
+        if(!isEmpty()) {
+            T return_val = array[(next_first + 1) % array.length];
+            array[(next_first + 1) % array.length] = null;
+            size--;
+            next_first = (next_first + 1) % array.length;
+            if ((double) size / array.length < 0.25) {
+                resize(array.length/ 2);
+            }
+            return return_val;
         }
-        return return_val;
+        return null;
     }
 
     public T removeLast() {
-        T return_val = array[next_last-1];
-        array[next_last-1] = null;
-        size--;
-        if (next_last - 1 < 0){
-            next_last = array.length - 1;
-        } else {
-            next_last = next_last - 1;
+        if(!isEmpty()) {
+            T return_val = array[next_last - 1];
+            array[next_last - 1] = null;
+            size--;
+            if (next_last - 1 < 0) {
+                next_last = array.length - 1;
+            } else {
+                next_last = next_last - 1;
+            }
+            if ((double) size / array.length < 0.25) {
+                resize(array.length / 2);
+            }
+            return return_val;
         }
-        if((double) size / array.length < 0.25) {
-            resize(size/2);
-        }
-        return return_val;
+        return null;
     }
 
     public T get(int index) {
