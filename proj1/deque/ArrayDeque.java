@@ -1,6 +1,6 @@
 package deque;
 
-class ArrayDeque<T> {
+public class ArrayDeque<T> {
 
     private T[] array;
     private int size;

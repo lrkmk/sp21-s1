@@ -1,6 +1,6 @@
 package deque;
 
-class LinkedListDeque<T> {
+public class LinkedListDeque<T> {
 
     private Node sentinel;
     private int size;
