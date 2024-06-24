@@ -13,24 +13,15 @@ public class ArrayDeque<T> {
     }
 
     private void resize(int capacity) {
-        if(capacity > array.length) {
-            next_last = array.length;
-            T[] arr = (T[]) new Object[capacity];
-            for (int i = 0; i < size; i++) {
-                arr[i] = array[(i+next_first+1)%array.length];
-            }
-            array = arr;
-            next_first = array.length - 1;
-        } else {
-            next_first = array.length / 2;
-            T[] arr = (T[]) new Object[capacity];
-            for (int i = 0; i < size; i++) {
-                arr[i] = array[(i+next_first+1)%array.length];
-            }
-            array = arr;
+        T[] newArray = (T[]) new Object[capacity];
+        for (int i = 0; i < size; i++) {
+            newArray[i] = array[(next_first + 1 + i) % array.length];
         }
-
+        array = newArray;
+        next_first = capacity - 1;
+        next_last = size;
     }
+
 
     public void addFirst(T item) {
         if (size == array.length) {
@@ -55,36 +46,33 @@ public class ArrayDeque<T> {
     }
 
     public T removeFirst() {
-        if(!isEmpty()) {
-            T return_val = array[(next_first + 1) % array.length];
-            array[(next_first + 1) % array.length] = null;
+        if (!isEmpty()) {
+            next_first = (next_first + 1) % array.length;  // Update next_first before accessing
+            T return_val = array[next_first];
+            array[next_first] = null;
             size--;
-            next_first = (next_first + 1) % array.length;
-//            if ((double) size / array.length < 0.25) {
-//                resize(array.length/ 2);
-//            }
+            if ((double) size / array.length < 0.25) {
+                resize(array.length / 2);
+            }
             return return_val;
         }
         return null;
     }
 
     public T removeLast() {
-        if(!isEmpty()) {
-            T return_val = array[next_last - 1];
-            array[next_last - 1] = null;
+        if (!isEmpty()) {
+            next_last = (next_last - 1 + array.length) % array.length;  // Update next_last before accessing
+            T return_val = array[next_last];
+            array[next_last] = null;
             size--;
-            if (next_last - 1 < 0) {
-                next_last = array.length - 1;
-            } else {
-                next_last = next_last - 1;
+            if ((double) size / array.length < 0.25) {
+                resize(array.length / 2);
             }
-//            if ((double) size / array.length < 0.25) {
-//                resize(array.length / 2);
-//            }
             return return_val;
         }
         return null;
     }
+
 
     public T get(int index) {
         return array[(next_first+index+1)% array.length];
