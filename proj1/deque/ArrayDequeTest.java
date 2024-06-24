@@ -149,6 +149,24 @@ public class ArrayDequeTest {
 //        for (int j = 0; j < 10; j++) {
 //            assertEquals("Should have the same value", j, (int) lld1.getRecursive(j));
 //        }
+    }
+    @Test
+    /* Add large number of elements to deque; check if order is correct. */
+    public void getWithoutResize() {
+
+
+        ArrayDeque<Integer> lld1 = new ArrayDeque<Integer>();
+        for (int i = 0; i < 7; i++) {
+            lld1.addLast(i);;
+        }
+
+        for (int j = 0; j < 7; j++) {
+            int value = lld1.get(j);
+            assertEquals("Should have the same value", j, value);
+        }
+
+
 
     }
+
 }

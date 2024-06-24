@@ -60,9 +60,9 @@ public class ArrayDeque<T> {
             array[(next_first + 1) % array.length] = null;
             size--;
             next_first = (next_first + 1) % array.length;
-            if ((double) size / array.length < 0.25) {
-                resize(array.length/ 2);
-            }
+//            if ((double) size / array.length < 0.25) {
+//                resize(array.length/ 2);
+//            }
             return return_val;
         }
         return null;
@@ -78,16 +78,16 @@ public class ArrayDeque<T> {
             } else {
                 next_last = next_last - 1;
             }
-            if ((double) size / array.length < 0.25) {
-                resize(array.length / 2);
-            }
+//            if ((double) size / array.length < 0.25) {
+//                resize(array.length / 2);
+//            }
             return return_val;
         }
         return null;
     }
 
     public T get(int index) {
-        return array[index];
+        return array[(next_first+index+1)% array.length];
     }
 
     public int size() {
