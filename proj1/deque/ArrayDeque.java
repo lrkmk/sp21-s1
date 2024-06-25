@@ -1,5 +1,6 @@
 package deque;
 
+import javax.annotation.Nonnull;
 import java.util.Iterator;
 
 public class ArrayDeque<T> implements Deque<T> {
@@ -99,6 +100,8 @@ public class ArrayDeque<T> implements Deque<T> {
         System.out.println();
     }
 
+    @Override
+    @Nonnull
     public Iterator<T> iterator() {
         return new ArrayDequeIterator();
     }

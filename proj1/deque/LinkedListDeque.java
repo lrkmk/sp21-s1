@@ -1,5 +1,7 @@
 package deque;
 
+
+import javax.annotation.Nonnull;
 import java.util.Iterator;
 
 public class LinkedListDeque<T> implements Deque<T>{
@@ -118,7 +120,8 @@ public class LinkedListDeque<T> implements Deque<T>{
         }
     }
 
-
+    @Override
+    @Nonnull
     public Iterator<T> iterator() {
         return new LinkedListDequeIterator();
     }
