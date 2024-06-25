@@ -1,9 +1,8 @@
 package deque;
 
-import javax.annotation.Nonnull;
 import java.util.Iterator;
 
-public class ArrayDeque<T> implements Deque<T> {
+public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
     private T[] array;
     private int size;
@@ -100,7 +99,6 @@ public class ArrayDeque<T> implements Deque<T> {
         System.out.println();
     }
 
-    @Override
     public Iterator<T> iterator() {
         return new ArrayDequeIterator();
     }
@@ -126,25 +124,25 @@ public class ArrayDeque<T> implements Deque<T> {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(Object o){
         if (this == o) {
             return true;
         }
-        if (o == null || !(o instanceof Deque)) {
+        if (o == null) {
+            return false;
+        }
+        if (!(o instanceof Deque)){
             return false;
         }
 
-        Deque<?> other = (Deque<?>) o;
-        if (this.size() != other.size()) {
+        Deque<T> obj = (Deque<T>)o;
+        if (obj.size() != this.size()){
             return false;
         }
-
-        Iterator<T> thisIterator = this.iterator();
-        Iterator<?> otherIterator = other.iterator();
-        while (thisIterator.hasNext() && otherIterator.hasNext()) {
-            T thisItem = thisIterator.next();
-            Object otherItem = otherIterator.next();
-            if (!thisItem.equals(otherItem)) {
+        for(int i = 0; i < obj.size(); i += 1){
+            T itemFromObj =  obj.get(i);
+            T itemFromThis = this.get(i);
+            if (!itemFromObj.equals(itemFromThis)){
                 return false;
             }
         }
