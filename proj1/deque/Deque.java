@@ -23,8 +23,5 @@ public interface Deque<T> extends Iterable<T> {
 
     void printDeque();
 
-    @Nonnull
-    Iterator<T> iterator();
-
     boolean equals(Object o);
 }

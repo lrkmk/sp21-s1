@@ -169,4 +169,29 @@ public class ArrayDequeTest {
 
     }
 
+    @Test
+    public void isEqual() {
+
+
+        ArrayDeque<Integer> lld1 = new ArrayDeque<Integer>();
+        ArrayDeque<Integer> lld2 = new ArrayDeque<Integer>();
+        ArrayDeque<Integer> lld3 = new ArrayDeque<Integer>();
+        for (int i = 0; i < 3; i++) {
+            lld1.addLast(i);;
+            lld2.addLast(i);
+            lld3.addLast(-i);
+        }
+
+        lld1.printDeque();
+        lld2.printDeque();
+
+
+        assertEquals("Should have the same value", true, lld1.equals(lld2));
+        assertEquals("Should have the same value", false, lld1.equals(lld3));
+
+
+
+
+    }
+
 }

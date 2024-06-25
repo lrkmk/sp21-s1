@@ -101,7 +101,6 @@ public class ArrayDeque<T> implements Deque<T> {
     }
 
     @Override
-    @Nonnull
     public Iterator<T> iterator() {
         return new ArrayDequeIterator();
     }
@@ -128,8 +127,24 @@ public class ArrayDeque<T> implements Deque<T> {
 
     @Override
     public boolean equals(Object o) {
-        for (T item: this) {
-            if (!item.equals(o)) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || !(o instanceof Deque)) {
+            return false;
+        }
+
+        Deque<?> other = (Deque<?>) o;
+        if (this.size() != other.size()) {
+            return false;
+        }
+
+        Iterator<T> thisIterator = this.iterator();
+        Iterator<?> otherIterator = other.iterator();
+        while (thisIterator.hasNext() && otherIterator.hasNext()) {
+            T thisItem = thisIterator.next();
+            Object otherItem = otherIterator.next();
+            if (!thisItem.equals(otherItem)) {
                 return false;
             }
         }
