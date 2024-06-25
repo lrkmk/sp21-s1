@@ -1,6 +1,8 @@
 package deque;
 
-public class ArrayDeque<T> implements Deque<T>{
+import java.util.Iterator;
+
+public class ArrayDeque<T> implements Deque<T> {
 
     private T[] array;
     private int size;
@@ -97,17 +99,44 @@ public class ArrayDeque<T> implements Deque<T>{
         System.out.println();
     }
 
-//    public static void main(String[] args) {
-//        ArrayDeque<Integer> deq = new ArrayDeque<Integer>();
-//        deq.addFirst(1);
-//        deq.addFirst(2);
-//        deq.addFirst(3);
-//        deq.addFirst(4);
-//        deq.addFirst(5);
-//        deq.addFirst(6);
-//        deq.addFirst(7);
-//        deq.addFirst(8);
-//        deq.addFirst(9);
-//        deq.printDeque();
-//    }
+    @Override
+    public Iterator<T> iterator() {
+        return new ArrayDequeIterator();
+    }
+
+    private class ArrayDequeIterator implements Iterator<T> {
+        private int pos;
+
+        public ArrayDequeIterator() {
+            pos = 0;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return pos < size;
+        }
+
+        @Override
+        public T next() {
+            T item = array[(next_first + pos + 1) % array.length];
+            pos += 1;
+            return item;
+        }
+    }
+    public static void main(String[] args) {
+        ArrayDeque<Integer> deq = new ArrayDeque<Integer>();
+        deq.addFirst(1);
+        deq.addFirst(2);
+        deq.addFirst(3);
+        deq.addFirst(4);
+        deq.addFirst(5);
+        deq.addFirst(6);
+        deq.addFirst(7);
+        deq.addFirst(8);
+        deq.addFirst(9);
+        for (Integer i : deq) {
+            System.out.println(i);
+        }
+        deq.printDeque();
+    }
 }
