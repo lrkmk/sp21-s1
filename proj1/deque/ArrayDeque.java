@@ -123,6 +123,17 @@ public class ArrayDeque<T> implements Deque<T> {
             return item;
         }
     }
+
+    @Override
+    public boolean equals(Object o) {
+        for (T item: this) {
+            if (!item.equals(o)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public static void main(String[] args) {
         ArrayDeque<Integer> deq = new ArrayDeque<Integer>();
         deq.addFirst(1);

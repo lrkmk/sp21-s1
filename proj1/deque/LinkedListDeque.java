@@ -142,4 +142,14 @@ public class LinkedListDeque<T> implements Deque<T>{
             return item;
         }
     }
+
+    @Override
+    public boolean equals(Object o) {
+        for (T item: this) {
+            if (!item.equals(o)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
