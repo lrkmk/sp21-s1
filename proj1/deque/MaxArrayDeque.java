@@ -58,17 +58,7 @@ public class MaxArrayDeque<T> extends ArrayDeque<T> {
         return size() == 0;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        for (T item: this) {
-            if (!item.equals(o)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-//    public static void main(String[] args) {
+    //    public static void main(String[] args) {
 //       MaxArrayDeque<Integer> deq = new MaxArrayDeque<Integer>();
 //        deq.addFirst(1);
 //        deq.addFirst(2);

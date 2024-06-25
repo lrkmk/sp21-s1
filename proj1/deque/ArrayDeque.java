@@ -99,7 +99,6 @@ public class ArrayDeque<T> implements Deque<T> {
         System.out.println();
     }
 
-    @Override
     public Iterator<T> iterator() {
         return new ArrayDequeIterator();
     }
@@ -149,5 +148,8 @@ public class ArrayDeque<T> implements Deque<T> {
             System.out.println(i);
         }
         deq.printDeque();
+        ArrayDeque<Integer> deq2 = new ArrayDeque<Integer>();
+        deq2.addFirst((1));
+        System.out.println(deq2.equals(deq));
     }
 }
