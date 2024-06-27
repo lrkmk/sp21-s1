@@ -54,10 +54,6 @@ public class MaxArrayDeque<T> extends ArrayDeque<T> {
         return max_val;
     }
 
-    public boolean isEmpty() {
-        return size() == 0;
-    }
-
     //    public static void main(String[] args) {
 //       MaxArrayDeque<Integer> deq = new MaxArrayDeque<Integer>();
 //        deq.addFirst(1);

@@ -7,7 +7,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     private T[] array;
     private int size;
     private int next_first = 0;
-    private int next_last = 0;
+    private int next_last = 1;
 
     public ArrayDeque() {
         size = 0;
@@ -149,28 +149,12 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         return true;
     }
 
-    public static void main(String[] args) {
-        ArrayDeque<Integer> deq = new ArrayDeque<Integer>();
-        deq.addLast(0);
-        deq.removeLast();
-        deq.addLast(2);
-        deq.removeLast();
-        deq.addFirst(4);
-        deq.removeLast();
-        deq.addLast(6);
-        deq.addLast(7);
-        deq.removeFirst();
-        deq.removeLast();
-        deq.addLast(10);
-        deq.addFirst(11);
-        deq.removeFirst();
-        deq.removeFirst();
-        deq.addLast(14);
-        deq.removeLast();
-        deq.addFirst(16);
-        deq.printDeque();
-        ArrayDeque<Integer> deq2 = new ArrayDeque<Integer>();
-        deq2.addFirst((1));
-        System.out.println(deq2.equals(deq));
-    }
+//    public static void main(String[] args) {
+//        ArrayDeque<Integer> deq = new ArrayDeque<Integer>();
+//        for(int i = 0; i < 8; i++) {
+//            deq.addLast(i);
+//        }
+//        System.out.println(deq.removeFirst());
+//        System.out.println(deq.removeLast());
+//    }
 }

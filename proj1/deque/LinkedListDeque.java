@@ -7,7 +7,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T>{
     private Node sentinel;
     private int size;
 
-    class Node {
+    private class Node {
         public T _item;
         public Node _prev;
         public Node _next;
@@ -24,20 +24,6 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T>{
         size = 0;
     }
 
-    public LinkedListDeque(T item) {
-        sentinel = new Node(null);
-        Node new_node = new Node(item);
-        sentinel._next = new_node;
-        sentinel._prev = new_node;
-        new_node._next = sentinel;
-        new_node._prev = sentinel;
-        size = 1;
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return size == 0;
-    }
 
     @Override
     public void addFirst(T item) {
