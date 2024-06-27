@@ -7,7 +7,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     private T[] array;
     private int size;
     private int next_first = 0;
-    private int next_last = 1;
+    private int next_last = 0;
 
     public ArrayDeque() {
         size = 0;
@@ -55,7 +55,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             T return_val = array[next_first];
             array[next_first] = null;
             size--;
-            if ((double) size / array.length < 0.25) {
+            if ((double) size / array.length < 0.25 && size > 8) {
                 resize(array.length / 2);
             }
             return return_val;
@@ -70,7 +70,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             T return_val = array[next_last];
             array[next_last] = null;
             size--;
-            if ((double) size / array.length < 0.25) {
+            if ((double) size / array.length < 0.25 && size > 8) {
                 resize(array.length / 2);
             }
             return return_val;
@@ -151,18 +151,23 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
     public static void main(String[] args) {
         ArrayDeque<Integer> deq = new ArrayDeque<Integer>();
-        deq.addFirst(1);
-        deq.addFirst(2);
-        deq.addFirst(3);
+        deq.addLast(0);
+        deq.removeLast();
+        deq.addLast(2);
+        deq.removeLast();
         deq.addFirst(4);
-        deq.addFirst(5);
-        deq.addFirst(6);
-        deq.addFirst(7);
-        deq.addFirst(8);
-        deq.addFirst(9);
-        for (Integer i : deq) {
-            System.out.println(i);
-        }
+        deq.removeLast();
+        deq.addLast(6);
+        deq.addLast(7);
+        deq.removeFirst();
+        deq.removeLast();
+        deq.addLast(10);
+        deq.addFirst(11);
+        deq.removeFirst();
+        deq.removeFirst();
+        deq.addLast(14);
+        deq.removeLast();
+        deq.addFirst(16);
         deq.printDeque();
         ArrayDeque<Integer> deq2 = new ArrayDeque<Integer>();
         deq2.addFirst((1));
