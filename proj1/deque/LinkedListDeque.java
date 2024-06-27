@@ -136,9 +136,8 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T>{
 
         @Override
         public T next() {
-            T item = pos._item;
             pos = pos._next;
-            return item;
+            return pos._item;
         }
     }
 
