@@ -5,7 +5,7 @@ import java.util.Set;
 
 public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
     private BSTNode rootNode;
-    int size = 0;
+    private int size = 0;
 
     private class BSTNode {
         K _key;
@@ -127,13 +127,13 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
         throw new UnsupportedOperationException();
     }
 
-    public static void main(String[] args) {
-        BSTMap<String, Integer> b = new BSTMap<String, Integer>();
-        for (int i = 0; i < 10; i++) {
-            b.put("hi" + i, 1 + i);
-        }
-        System.out.println(b.size());
-        b.printInOrder();
-    }
+//    public static void main(String[] args) {
+//        BSTMap<String, Integer> b = new BSTMap<String, Integer>();
+//        for (int i = 0; i < 10; i++) {
+//            b.put("hi" + i, 1 + i);
+//        }
+//        System.out.println(b.size());
+//        b.printInOrder();
+//    }
 
 }
