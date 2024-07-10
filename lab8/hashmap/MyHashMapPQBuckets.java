@@ -43,7 +43,7 @@ public class MyHashMapPQBuckets<K extends Comparable<K>, V> extends MyHashMap<K,
     }
 
     @Override
-    protected Collection<Node> createBucket() {
+    protected Collection<Node<K, V>> createBucket() {
         // This is fancy new-fangled Java that says in plain English:
         //
         //  "Build a PriorityQueue of Nodes, and when you compare two Nodes,

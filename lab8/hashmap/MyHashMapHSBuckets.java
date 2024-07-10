@@ -39,7 +39,7 @@ public class MyHashMapHSBuckets<K, V> extends MyHashMap<K, V> {
     }
 
     @Override
-    protected Collection<Node> createBucket() {
+    protected Collection<Node<K, V>> createBucket() {
         return new HashSet<>();
     }
 }

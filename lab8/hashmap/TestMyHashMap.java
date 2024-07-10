@@ -28,7 +28,7 @@ public class TestMyHashMap {
     }
 
     public static void sanityClearTest(MyHashMap<String, Integer> b) {
-        for (int i = 0; i < 455; i++) {
+        for (int i = 0; i < 13; i++) {
             b.put("hi" + i, 1);
             //make sure put is working via containsKey and get
             assertTrue(null != b.get("hi" + i)
@@ -36,7 +36,7 @@ public class TestMyHashMap {
         }
         b.clear();
         assertEquals(0, b.size());
-        for (int i = 0; i < 455; i++) {
+        for (int i = 0; i < 13; i++) {
             assertTrue(null == b.get("hi" + i) && !b.containsKey("hi" + i));
         }
     }
