@@ -61,7 +61,6 @@ public class Dog implements Serializable{ // TODO
         File f = join(CapersRepository.CAPERS_FOLDER, "dogs", name);
         f.createNewFile();
         writeObject(f, serialize(this));
-        System.out.println("saved");
     }
 
     @Override
