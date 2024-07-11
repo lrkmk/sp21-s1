@@ -59,8 +59,7 @@ public class Dog implements Serializable{ // TODO
     public void saveDog() throws IOException {
         // TODO (hint: don't forget dog names are unique)
         File f = join(CapersRepository.CAPERS_FOLDER, "dogs", name);
-        f.createNewFile();
-        writeObject(f, serialize(this));
+        writeObject(f, this);
     }
 
     @Override
