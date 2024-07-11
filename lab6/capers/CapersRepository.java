@@ -1,6 +1,9 @@
 package capers;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+
 import static capers.Utils.*;
 
 /** A repository for Capers 
@@ -18,7 +21,7 @@ public class CapersRepository {
     static final File CWD = new File(System.getProperty("user.dir"));
 
     /** Main metadata folder. */
-    static final File CAPERS_FOLDER = null; // TODO Hint: look at the `join`
+    static final File CAPERS_FOLDER = Utils.join(CWD,".capers"); // TODO Hint: look at the `join`
                                             //      function in Utils
 
     /**
@@ -30,8 +33,22 @@ public class CapersRepository {
      *    - dogs/ -- folder containing all of the persistent data for dogs
      *    - story -- file containing the current story
      */
-    public static void setupPersistence() {
-        // TODO
+    public static void setupPersistence() throws IOException {
+
+        if (!CAPERS_FOLDER.exists()) {
+            CAPERS_FOLDER.mkdir();
+        }
+
+        File dogFolder = Utils.join(CAPERS_FOLDER, "dogs");
+        if (!dogFolder.exists()) {
+            dogFolder.mkdir();
+        }
+
+        File story = Utils.join(CAPERS_FOLDER, "story.txt");
+        if (!story.exists()) {
+            story.createNewFile();
+        }
+
     }
 
     /**
@@ -41,6 +58,14 @@ public class CapersRepository {
      */
     public static void writeStory(String text) {
         // TODO
+        File f = Utils.join(CAPERS_FOLDER, "story.txt");
+        String old = "";
+        if (f.isFile()) {
+            old = readContentsAsString(f);
+        }
+        old += '\n' + text;
+        Utils.writeContents(f, old);
+        System.out.println(old);
     }
 
     /**
@@ -48,8 +73,11 @@ public class CapersRepository {
      * three non-command arguments of args (name, breed, age).
      * Also prints out the dog's information using toString().
      */
-    public static void makeDog(String name, String breed, int age) {
+    public static void makeDog(String name, String breed, int age) throws IOException {
         // TODO
+        Dog dog = new Dog(name, breed, age);
+        dog.saveDog();
+        System.out.println(dog.toString());
     }
 
     /**
