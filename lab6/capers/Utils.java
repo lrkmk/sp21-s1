@@ -79,7 +79,6 @@ class Utils {
         try {
             ObjectInputStream in =
                     new ObjectInputStream(new FileInputStream(file));
-            System.out.println(file);
             T result = expectedClass.cast(in.readObject());
             in.close();
             return result;
