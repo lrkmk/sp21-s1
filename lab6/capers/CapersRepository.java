@@ -59,11 +59,12 @@ public class CapersRepository {
     public static void writeStory(String text) {
         // TODO
         File f = Utils.join(CAPERS_FOLDER, "story.txt");
-        String old = "";
-        if (f.isFile()) {
-            old = readContentsAsString(f);
+        String old = readContentsAsString(f);;
+        if (!old.equals("")) {
+            old += '\n' + text;
+        } else {
+            old = text;
         }
-        old += '\n' + text;
         Utils.writeContents(f, old);
         System.out.println(old);
     }
