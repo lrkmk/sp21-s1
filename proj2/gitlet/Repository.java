@@ -155,11 +155,11 @@ public class Repository {
             if (!comFile.exists()) {
                 comFile.createNewFile();
             }
-
+            writeObject(comFile, com);
         } catch (IOException e) {
             System.err.println("An error occurred while creating or writing to the file: " + e.getMessage());
         }
-        writeObject(comFile, com);
+
         mas.refToCommit = com.getCommitID();
         writeObject(master, mas);
     }
@@ -182,16 +182,17 @@ public class Repository {
     public static void log() {
         Commit com = getCurrentCommit();
         System.out.println("===");
-        System.out.println("Commit " + com.getCommitID());
+        System.out.println("commit " + com.getCommitID());
         System.out.println("Date: " + com.getTimeStamp());
         System.out.println(com.getMessage());
+        System.out.println();
         while (com.getParentID() != null) {
             com = readObject(join(COMMITS_DIR, com.getParentID()), Commit.class);
-            System.out.println();
             System.out.println("===");
-            System.out.println("Commit " + com.getCommitID());
+            System.out.println("commit " + com.getCommitID());
             System.out.println("Date: " + com.getTimeStamp());
             System.out.println(com.getMessage());
+            System.out.println();
         }
     }
 
@@ -201,7 +202,6 @@ public class Repository {
 
         byte[] file1Bytes = Files.readAllBytes(p1);
         byte[] file2Bytes = Files.readAllBytes(p2);
-
         return java.util.Arrays.equals(file1Bytes, file2Bytes);
     }
 

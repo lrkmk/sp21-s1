@@ -3,9 +3,8 @@ package gitlet;
 // TODO: any imports you need here
 
 import java.io.Serializable;
-import java.util.Date; // TODO: You'll likely use this in this class
-import java.util.HashMap;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /** Represents a gitlet commit object.
  *  TODO: It's a good idea to give a description here of what else this Class
@@ -28,13 +27,14 @@ public class Commit implements Serializable {
     private String parent2;
     private Date timeStamp;
     private HashMap<String,String> refs;
-
+    private String commitID;
 
     /* TODO: fill in the rest of this class. */
     public Commit(String m) {
         message = m;
         timeStamp = new Date(0);
         refs = new HashMap<>();
+        commitID = hash();
     }
 
     public Commit(String m, Commit parent) {
@@ -42,12 +42,13 @@ public class Commit implements Serializable {
         parent1 = parent.getCommitID();
         timeStamp = new Date();
         refs = new HashMap<>(parent.getRefs());
+        commitID = hash();
     }
 
     public String getMessage() { return message; };
     public String getParentID() { return  parent1; }
-    public String getTimeStamp() { return  timeStamp.toString(); }
-    public String getCommitID() { return this.hash(); }
+    public String getTimeStamp() { return  getFormattedDate(); }
+    public String getCommitID() { return commitID; }
     public HashMap<String,String> getRefs() { return refs; }
 
     private String hash() {
@@ -56,6 +57,7 @@ public class Commit implements Serializable {
 
     public void addFile(String fname, String fid) {
         refs.put(fname, fid);
+        commitID = hash();
     }
 
     public String getFile(String fname) {
@@ -66,4 +68,9 @@ public class Commit implements Serializable {
         return refs.containsKey(fname);
     }
 
+    private String getFormattedDate() {
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss yyyy Z", Locale.ENGLISH);
+        sdf.setTimeZone(TimeZone.getTimeZone("America/Los_Angeles")); // Set time zone
+        return sdf.format(timeStamp);
+    }
 }
