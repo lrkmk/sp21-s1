@@ -74,7 +74,7 @@ public class Repository {
         writeContents(HEAD, br.name);
     }
 
-    public static void add(String filename) throws IOException {
+    public static void add(String filename) {
         File f = join(CWD, filename);
 
         if (!f.exists()) {
@@ -86,18 +86,34 @@ public class Repository {
         File fs = join(STAGE_DIR, filename);
         if (fs.exists()) {
             // further check if they are different, if so, replace, else remove the file in staging area
-            if (compareFiles(f, fs)) {
-                Files.copy(f.toPath(), fs.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            } else {
-                Utils.restrictedDelete(fs);
+            try {
+                if (compareFiles(f, fs)) {
+                    try {
+                        Files.copy(f.toPath(), fs.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                } else {
+                    Utils.restrictedDelete(fs);
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         } else {
-            fs.createNewFile();
-            Files.copy(f.toPath(), fs.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            try {
+                fs.createNewFile();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            try {
+                Files.copy(f.toPath(), fs.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
-    public static void commit(String message) throws IOException {
+    public static void commit(String message) {
         if (message == null) {
             System.out.println("Please enter a commit message.");
             return;
@@ -112,8 +128,15 @@ public class Repository {
             String fileID = sha1(readContents(files[0]));
             com.addFile(files[0].getName(), fileID);
             File f = join(BLOBS_DIR, com.getFile(files[0].getName()));
-            f.createNewFile();
-            writeContents(f, readContents(files[0]));
+            try {
+                // Ensure the file is created if it doesn't exist
+                if (!f.exists()) {
+                   f.createNewFile();
+                }
+                writeContents(f, readContents(files[0]));
+            } catch (IOException e) {
+                System.err.println("An error occurred while creating or writing to the file: " + e.getMessage());
+            }
             files[0].delete();
         } else {
             System.out.println("No changes added to the commit.");
@@ -123,7 +146,15 @@ public class Repository {
 
         // let Master branch points to newest commit
         File comFile = join(COMMITS_DIR, com.getCommitID());
-        comFile.createNewFile();
+        try {
+            // Ensure the file is created if it doesn't exist
+            if (!comFile.exists()) {
+                comFile.createNewFile();
+            }
+
+        } catch (IOException e) {
+            System.err.println("An error occurred while creating or writing to the file: " + e.getMessage());
+        }
         writeObject(comFile, com);
         mas.refToCommit = com.getCommitID();
         writeObject(master, mas);
@@ -180,20 +211,27 @@ public class Repository {
         return readObject(join(COMMITS_DIR, commitID), Commit.class);
     }
 
-    public static void checkoutFile(String filename) throws IOException {
+    public static void checkoutFile(String filename) {
         Commit com = getCurrentCommit();
         if (!com.hasFile(filename)) {
             System.out.println("File does not exist in that commit.");
             return;
         }
         File f = join(CWD, filename);
-        if (!f.exists()) {
-            f.createNewFile();
+        try {
+            // Ensure the file is created if it doesn't exist
+            if (!f.exists()) {
+                f.createNewFile();
+            }
+            writeContents(f, readContents(join(BLOBS_DIR, com.getFile(filename))));
+        } catch (IOException e) {
+            System.err.println("An error occurred while creating or writing to the file: " + e.getMessage());
         }
-        writeContents(f, readContents(join(BLOBS_DIR, com.getFile(filename))));
+
+
     }
 
-    public static void checkoutBranch(String branch) throws IOException {
+    public static void checkoutBranch(String branch)  {
         File br = join(BRANCHES_DIR, branch);
         if (!br.exists()) {
             System.out.println("No such branch exists.");
@@ -230,11 +268,14 @@ public class Repository {
         for (Map.Entry<String, String> entry : map.entrySet()) {
             File fRecorded = join(BLOBS_DIR, entry.getValue());
             File fCWD = join(CWD, entry.getKey()); // Changed to entry.getKey() for the file name
-            if (!fCWD.exists()) {
-                fCWD.createNewFile();
+            try {
+                // Ensure the file is created if it doesn't exist
+                if (!fCWD.exists()) {
+                    fCWD.createNewFile();
+                }
                 writeContents(fCWD, readContentsAsString(fRecorded));
-            } else {
-                writeContents(fCWD, readContentsAsString(fRecorded));
+            } catch (IOException e) {
+                System.err.println("An error occurred while creating or writing to the file: " + e.getMessage());
             }
             processedFiles.add(fCWD.getName());
         }
@@ -261,7 +302,7 @@ public class Repository {
 
     }
 
-    public static void checkoutFileWithID(String commitID, String filename) throws IOException {
+    public static void checkoutFileWithID(String commitID, String filename)  {
         File comFile = join(COMMITS_DIR, commitID);
         if (!comFile.exists()) {
             System.out.println("No commit with that id exists.");
@@ -273,10 +314,16 @@ public class Repository {
             return;
         }
         File f = join(CWD, filename);
-        if (!f.exists()) {
-            f.createNewFile();
+        try {
+            // Ensure the file is created if it doesn't exist
+            if (!f.exists()) {
+                f.createNewFile();
+            }
+            writeContents(f, readContents(join(BLOBS_DIR, com.getFile(filename))));
+        } catch (IOException e) {
+            System.err.println("An error occurred while creating or writing to the file: " + e.getMessage());
         }
-        writeContents(f, readContents(join(BLOBS_DIR, com.getFile(filename))));
+
     }
 
 }
