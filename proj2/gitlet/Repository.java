@@ -46,7 +46,7 @@ public class Repository {
     private Branch currentBranch;
 
     /* TODO: fill in the rest of this class. */
-    public static void init() throws IOException {
+    public static void init() {
         // create the whole structure of gitlet
         if (GITLET_DIR.exists()) {
             System.out.println("A Gitlet version-control system already exists in the current directory.");
@@ -58,18 +58,30 @@ public class Repository {
         BLOBS_DIR.mkdir();
         COMMITS_DIR.mkdir();
         BRANCHES_DIR.mkdir();
-        HEAD.createNewFile();
+        try {
+            HEAD.createNewFile();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         // add the initial commit
         Commit com = new Commit("initial commit");
         File initCommit = join(COMMITS_DIR, com.getCommitID());
-        initCommit.createNewFile();
+        try {
+            initCommit.createNewFile();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         writeObject(initCommit, com);
 
         // head points to the initial commit
         Branch br = new Branch("Master", com.getCommitID());
         File branch = join(BRANCHES_DIR, "Master");
-        branch.createNewFile();
+        try {
+            branch.createNewFile();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         writeObject(branch, br);
         writeContents(HEAD, br.name);
     }
@@ -82,36 +94,28 @@ public class Repository {
             return;
         }
 
-        // check if the file being added to staging area has already been added
         File fs = join(STAGE_DIR, filename);
-        if (fs.exists()) {
-            // further check if they are different, if so, replace, else remove the file in staging area
-            try {
+
+        try {
+            if (fs.exists()) {
                 if (compareFiles(f, fs)) {
-                    try {
-                        Files.copy(f.toPath(), fs.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
+                    copyFile(f, fs);
                 } else {
                     Utils.restrictedDelete(fs);
                 }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-            try {
+            } else {
                 fs.createNewFile();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+                copyFile(f, fs);
             }
-            try {
-                Files.copy(f.toPath(), fs.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+        } catch (IOException e) {
+            throw new RuntimeException("An error occurred while adding the file: " + e.getMessage(), e);
         }
     }
+
+    private static void copyFile(File source, File dest) throws IOException {
+        Files.copy(source.toPath(), dest.toPath(), StandardCopyOption.REPLACE_EXISTING);
+    }
+
 
     public static void commit(String message) {
         if (message == null) {
