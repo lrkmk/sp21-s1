@@ -37,6 +37,18 @@ public class Main {
             case "log":
                 Repository.log();
                 break;
+            case "checkout":
+                if (args.length == 2) {
+                    String branch = args[1];
+                    Repository.checkoutBranch(branch);
+                } else if (args.length == 3) {
+                    String filename = args[2];
+                    Repository.checkoutFile(filename);
+                } else if (args.length == 4) {
+                    String commitID = args[1];
+                    String filename = args[3];
+                    Repository.checkoutFileWithID(commitID, filename);
+                }
         }
     }
 }

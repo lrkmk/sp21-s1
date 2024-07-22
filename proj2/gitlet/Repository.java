@@ -3,10 +3,15 @@ package gitlet;
 import jdk.jshell.execution.Util;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import static gitlet.Utils.*;
 
@@ -38,6 +43,7 @@ public class Repository {
     public static File COMMITS_DIR = join(OBJECTS_DIR, "commits");;
     public static File BRANCHES_DIR = join(GITLET_DIR, "branches");;
     public static final File HEAD = join(GITLET_DIR, "HEAD");;
+    private Branch currentBranch;
 
     /* TODO: fill in the rest of this class. */
     public static void init() throws IOException {
@@ -86,6 +92,7 @@ public class Repository {
                 Utils.restrictedDelete(fs);
             }
         } else {
+            fs.createNewFile();
             Files.copy(f.toPath(), fs.toPath(), StandardCopyOption.REPLACE_EXISTING);
         }
     }
@@ -97,16 +104,23 @@ public class Repository {
         }
         File master = join(BRANCHES_DIR, "Master");
         Branch mas = readObject(master, Branch.class);
+
         // create a new commit with parent previously pointed by HEAD
-        Commit com = new Commit(message, mas.refToCommit);
-        File[] f = STAGE_DIR.listFiles();
-        if (f != null && f.length != 0) {
-            com.addFile(f[0].getName(), sha1(serialize(f[0])));
-            f[0].delete();
+        Commit com = new Commit(message, getSpecificCommit(mas.refToCommit));
+        File[] files = STAGE_DIR.listFiles();
+        if (files != null && files.length != 0) {
+            String fileID = sha1(readContents(files[0]));
+            com.addFile(files[0].getName(), fileID);
+            File f = join(BLOBS_DIR, com.getFile(files[0].getName()));
+            f.createNewFile();
+            writeContents(f, readContents(files[0]));
+            files[0].delete();
         } else {
             System.out.println("No changes added to the commit.");
             return;
         }
+
+
         // let Master branch points to newest commit
         File comFile = join(COMMITS_DIR, com.getCommitID());
         comFile.createNewFile();
@@ -158,7 +172,111 @@ public class Repository {
 
     private static Commit getCurrentCommit() {
         String branchName = Utils.readContentsAsString(HEAD);
-        Branch master = readObject(join(BRANCHES_DIR, branchName), Branch.class);
-        return readObject(join(COMMITS_DIR, master.refToCommit), Commit.class);
+        Branch current = readObject(join(BRANCHES_DIR, branchName), Branch.class);
+        return readObject(join(COMMITS_DIR, current.refToCommit), Commit.class);
     }
+
+    private static Commit getSpecificCommit(String commitID) {
+        return readObject(join(COMMITS_DIR, commitID), Commit.class);
+    }
+
+    public static void checkoutFile(String filename) throws IOException {
+        Commit com = getCurrentCommit();
+        if (!com.hasFile(filename)) {
+            System.out.println("File does not exist in that commit.");
+            return;
+        }
+        File f = join(CWD, filename);
+        if (!f.exists()) {
+            f.createNewFile();
+        }
+        writeContents(f, readContents(join(BLOBS_DIR, com.getFile(filename))));
+    }
+
+    public static void checkoutBranch(String branch) throws IOException {
+        File br = join(BRANCHES_DIR, branch);
+        if (!br.exists()) {
+            System.out.println("No such branch exists.");
+            return;
+        }
+        String branchName = Utils.readContentsAsString(HEAD);
+        File currentBr = join(BRANCHES_DIR, branchName);
+        if (currentBr.getName().equals(branch)) {
+            System.out.println("No need to checkout the current branch.");
+            return;
+        }
+        Branch currentBranch = readObject(currentBr, Branch.class);
+        Commit com = readObject(join(COMMITS_DIR, currentBranch.refToCommit), Commit.class);
+
+        // check whether there are untracked files in CWD
+        File[] files = CWD.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File file) {
+                return !file.isHidden();
+            }
+        });
+        for (File f : files) {
+            if (!com.hasFile(f.getName())) {
+                System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                return;
+            }
+        }
+
+        // overwrite files in CWD
+        HashMap<String, String> map = com.getRefs(); // Replace with actual method call
+
+        Set<String> processedFiles = new HashSet<>();
+
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            File fRecorded = join(BLOBS_DIR, entry.getValue());
+            File fCWD = join(CWD, entry.getKey()); // Changed to entry.getKey() for the file name
+            if (!fCWD.exists()) {
+                fCWD.createNewFile();
+                writeContents(fCWD, readContentsAsString(fRecorded));
+            } else {
+                writeContents(fCWD, readContentsAsString(fRecorded));
+            }
+            processedFiles.add(fCWD.getName());
+        }
+
+        // Iterate through CWD and delete files not in processedFiles
+        File[] cwdFiles = CWD.listFiles();
+        if (cwdFiles != null) {
+            for (File file : cwdFiles) {
+                if (file.isFile() && !processedFiles.contains(file.getName())) {
+                    file.delete();
+                }
+            }
+        }
+
+        // clear staging area
+        File[] stageFiles = STAGE_DIR.listFiles();
+        if (stageFiles[0].exists()) {
+            restrictedDelete(stageFiles[0]);
+        }
+
+        // track current branch
+        writeContents(HEAD, currentBranch.name);
+
+
+    }
+
+    public static void checkoutFileWithID(String commitID, String filename) throws IOException {
+        File comFile = join(COMMITS_DIR, commitID);
+        if (!comFile.exists()) {
+            System.out.println("No commit with that id exists.");
+            return;
+        }
+        Commit com = readObject(comFile, Commit.class);
+        if (!com.hasFile(filename)) {
+            System.out.println("File does not exist in that commit.");
+            return;
+        }
+        File f = join(CWD, filename);
+        if (!f.exists()) {
+            f.createNewFile();
+        }
+        writeContents(f, readContents(join(BLOBS_DIR, com.getFile(filename))));
+    }
+
 }
