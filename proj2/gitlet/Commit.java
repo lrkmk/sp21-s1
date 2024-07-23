@@ -62,6 +62,12 @@ public class Commit implements Serializable {
         return  parent1.getCommitID();
     }
     public Commit getParent() { return parent1; }
+    public Commit getParent2() {
+        if (parent2 != null) {
+            return parent2;
+        }
+        return null;
+    }
     public String getTimeStamp() { return  getFormattedDate(); }
     public String getCommitID() { return commitID; }
     public HashMap<String,String> getRefs() { return refs; }

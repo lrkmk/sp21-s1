@@ -66,21 +66,11 @@ public class Repository {
         // add the initial commit
         Commit com = new Commit("initial commit");
         File initCommit = join(COMMITS_DIR, com.getCommitID());
-        try {
-            initCommit.createNewFile();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
         writeObject(initCommit, com);
 
         // head points to the initial commit
         Branch br = new Branch("master", com.getCommitID());
         File branch = join(BRANCHES_DIR, "master");
-        try {
-            branch.createNewFile();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
         writeObject(branch, br);
         writeContents(HEAD, br.name);
     }
@@ -231,6 +221,10 @@ public class Repository {
         Commit com = getCurrentCommit();
         System.out.println("===");
         System.out.println("commit " + com.getCommitID());
+        if (com.getParent2() != null) {
+            System.out.println("Merge: " + com.getParent().getCommitID().substring(0,7) +
+                    com.getParent2().getCommitID().substring(0, 7));
+        }
         System.out.println("Date: " + com.getTimeStamp());
         System.out.println(com.getMessage());
         System.out.println();
@@ -238,6 +232,10 @@ public class Repository {
             com = readObject(join(COMMITS_DIR, com.getParentID()), Commit.class);
             System.out.println("===");
             System.out.println("commit " + com.getCommitID());
+            if (com.getParent2() != null) {
+                System.out.println("Merge: " + com.getParent().getCommitID().substring(0,7) +
+                        com.getParent2().getCommitID().substring(0, 7));
+            }
             System.out.println("Date: " + com.getTimeStamp());
             System.out.println(com.getMessage());
             System.out.println();
@@ -401,6 +399,10 @@ public class Repository {
     }
 
     public static void status() {
+        if (!GITLET_DIR.exists()) {
+            System.out.println("Not in an initialized Gitlet directory.");
+            return;
+        }
         System.out.println("=== Branches ===");
         List<String> branches = plainFilenamesIn(BRANCHES_DIR);
         Collections.sort(branches);
@@ -453,7 +455,7 @@ public class Repository {
         } else if (readContentsAsString(HEAD).equals(branchName)) {
             System.out.println("Cannot remove the current branch.");
         } else {
-            restrictedDelete(branchFile);
+            branchFile.delete();
         }
     }
 
