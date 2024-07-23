@@ -75,7 +75,7 @@ public class Repository {
 
         // head points to the initial commit
         Branch br = new Branch("Master", com.getCommitID());
-        File branch = join(BRANCHES_DIR, "Master");
+        File branch = join(BRANCHES_DIR, "master");
         try {
             branch.createNewFile();
         } catch (IOException e) {
