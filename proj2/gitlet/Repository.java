@@ -74,7 +74,7 @@ public class Repository {
         writeObject(initCommit, com);
 
         // head points to the initial commit
-        Branch br = new Branch("Master", com.getCommitID());
+        Branch br = new Branch("master", com.getCommitID());
         File branch = join(BRANCHES_DIR, "master");
         try {
             branch.createNewFile();
@@ -163,7 +163,7 @@ public class Repository {
     }
 
     public static void mergeCommit(String message, Commit p1, Commit p2) {
-        File master = join(BRANCHES_DIR, "Master");
+        File master = join(BRANCHES_DIR, "master");
         Branch mas = readObject(master, Branch.class);
 
         // create a new commit with parent previously pointed by HEAD
