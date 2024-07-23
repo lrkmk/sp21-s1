@@ -43,14 +43,14 @@ public class Main {
                     Repository.checkoutBranch(branch);
                     break;
                 } else if (args.length == 3) {
-                    if (!args[1].equals("==")) {
+                    if (!args[1].equals("--")) {
                         System.out.println("Incorrect operands.");
                     }
                     String filename = args[2];
                     Repository.checkoutFile(filename);
                     break;
                 } else if (args.length == 4) {
-                    if (!args[2].equals("==")) {
+                    if (!args[2].equals("--")) {
                         System.out.println("Incorrect operands.");
                     }
                     String commitID = args[1];
