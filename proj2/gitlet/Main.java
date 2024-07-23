@@ -41,14 +41,43 @@ public class Main {
                 if (args.length == 2) {
                     String branch = args[1];
                     Repository.checkoutBranch(branch);
+                    break;
                 } else if (args.length == 3) {
                     String filename = args[2];
                     Repository.checkoutFile(filename);
+                    break;
                 } else if (args.length == 4) {
                     String commitID = args[1];
                     String filename = args[3];
                     Repository.checkoutFileWithID(commitID, filename);
+                    break;
+                } else {
+                    break;
                 }
+            case "global-log":
+                Repository.globalLog();
+                break;
+            case "find":
+                Repository.find(args[1]);
+                break;
+            case "status":
+                Repository.status();
+                break;
+            case "rm":
+                Repository.rm(args[1]);
+                break;
+            case "branch":
+                Repository.branch(args[1]);
+                break;
+            case "rm-branch":
+                Repository.removeBranch(args[1]);
+                break;
+            case "reset":
+                Repository.reset(args[1]);
+                break;
+            case "merge":
+                Repository.merge(args[1]);
+                break;
         }
     }
 }

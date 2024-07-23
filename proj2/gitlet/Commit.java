@@ -23,8 +23,8 @@ public class Commit implements Serializable {
 
     /** The message of this Commit. */
     private String message;
-    private String parent1;
-    private String parent2;
+    private Commit parent1;
+    private Commit parent2;
     private Date timeStamp;
     private HashMap<String,String> refs;
     private String commitID;
@@ -39,14 +39,29 @@ public class Commit implements Serializable {
 
     public Commit(String m, Commit parent) {
         message = m;
-        parent1 = parent.getCommitID();
+        parent1 = parent;
         timeStamp = new Date();
         refs = new HashMap<>(parent.getRefs());
         commitID = hash();
     }
 
+    public Commit(String m, Commit parent1, Commit parent2) {
+        message = m;
+        this.parent1 = parent1;
+        this.parent2 = parent2;
+        timeStamp = new Date();
+        refs = new HashMap<>(parent1.getRefs());
+        commitID = hash();
+    }
+
     public String getMessage() { return message; };
-    public String getParentID() { return  parent1; }
+    public String getParentID() {
+        if (parent1 == null) {
+            return null;
+        }
+        return  parent1.getCommitID();
+    }
+    public Commit getParent() { return parent1; }
     public String getTimeStamp() { return  getFormattedDate(); }
     public String getCommitID() { return commitID; }
     public HashMap<String,String> getRefs() { return refs; }
@@ -62,6 +77,10 @@ public class Commit implements Serializable {
 
     public String getFile(String fname) {
         return refs.get(fname);
+    }
+
+    public void removeFile(String fname) {
+        refs.remove(fname);
     }
 
     public boolean hasFile(String fname) {
