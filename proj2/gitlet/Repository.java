@@ -94,6 +94,12 @@ public class Repository {
         }
 
         File fs = join(STAGE_DIR, filename);
+        File fr = join(RSTAGE_DIR, filename);
+        if (fr.exists()) {
+            writeContents(f, readContentsAsString(fr));
+            fr.delete();
+            return;
+        }
 
         if (getCurrentCommit().hasFile(filename)) {
             // remove the file in staging area if the content in CWD is the same as tracked by current commit
@@ -113,7 +119,7 @@ public class Repository {
 
 
     public static void commit(String message) {
-        if (message == null) {
+        if (message == null || message.isEmpty()) {
             System.out.println("Please enter a commit message.");
             return;
         }
@@ -134,7 +140,7 @@ public class Repository {
                 writeContents(f, readContents(file));
                 file.delete();
             }
-            System.out.println("did");
+
         }
         if (rFiles != null && rFiles.length != 0) {
             changed = true;
@@ -212,9 +218,11 @@ public class Repository {
         if (com.hasFile(filename)) {
             File f = join(CWD, filename);
             File rf = join(RSTAGE_DIR, filename);
-            writeContents(rf, readContents(f));
             if (f.exists()) {
+                writeContents(rf, readContentsAsString(f));
                 f.delete();
+            } else {
+                writeContents(rf, readContentsAsString(join(BLOBS_DIR, com.getFile(filename))));
             }
         }
     }
@@ -308,9 +316,6 @@ public class Repository {
         }
         Branch currentBranch = readObject(currentBr, Branch.class);
         Commit com = readObject(join(COMMITS_DIR, currentBranch.refToCommit), Commit.class);
-        for (Map.Entry<String,String> entry: com.getRefs().entrySet()) {
-            System.out.println("contains " + entry.getKey());
-        }
         Branch targetBranch = readObject(join(BRANCHES_DIR, branch), Branch.class);
         Commit targetCom = readObject(join(COMMITS_DIR, targetBranch.refToCommit), Commit.class);
         // check whether there are untracked files in CWD
