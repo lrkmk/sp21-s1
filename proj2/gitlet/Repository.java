@@ -319,7 +319,7 @@ public class Repository {
         // check whether there are untracked files in CWD that would result in conflict
         List<String> untracked = getUntracked();
         for (String f : untracked) {
-            if (com.hasFile(f)) {
+            if (targetCom.hasFile(f)) {
                 System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
                 return;
             }
