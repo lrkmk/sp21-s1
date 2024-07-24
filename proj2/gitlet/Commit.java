@@ -50,23 +50,39 @@ public class Commit implements Serializable {
         commitID = hash();
     }
 
-    public String getMessage() { return message; };
+    public String getMessage() {
+        return message;
+    };
+
     public String getParentID() {
         if (parent1 == null) {
             return null;
         }
         return  parent1.getCommitID();
     }
-    public Commit getParent() { return parent1; }
+
+    public Commit getParent() {
+        return parent1;
+    }
+
     public Commit getParent2() {
         if (parent2 != null) {
             return parent2;
         }
         return null;
     }
-    public String getTimeStamp() { return  getFormattedDate(); }
-    public String getCommitID() { return commitID; }
-    public HashMap<String,String> getRefs() { return refs; }
+
+    public String getTimeStamp() {
+        return  getFormattedDate();
+    }
+
+    public String getCommitID() {
+        return commitID;
+    }
+
+    public HashMap<String,String> getRefs() {
+        return refs;
+    }
 
     private String hash() {
         return Utils.sha1(Utils.serialize(this));

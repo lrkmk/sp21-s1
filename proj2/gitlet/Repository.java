@@ -1,9 +1,7 @@
 package gitlet;
 
-import jdk.jshell.execution.Util;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,14 +30,13 @@ public class Repository {
     /** The .gitlet directory. */
     public static final File GITLET_DIR = join(CWD, ".gitlet");
 
-    public static final File STAGE_DIR = join(GITLET_DIR, "staging_area");;
-    public static File OBJECTS_DIR = join(GITLET_DIR, "objects");
-    public static File BLOBS_DIR = join(OBJECTS_DIR, "blobs");;
-    public static File COMMITS_DIR = join(OBJECTS_DIR, "commits");;
-    public static File BRANCHES_DIR = join(GITLET_DIR, "branches");;
-    public static File RSTAGE_DIR = join(GITLET_DIR, "remove_stage");
-    public static final File HEAD = join(GITLET_DIR, "HEAD");;
-    private Branch currentBranch;
+    private static final File STAGE_DIR = join(GITLET_DIR, "staging_area");;
+    private static final File OBJECTS_DIR = join(GITLET_DIR, "objects");
+    private static final File BLOBS_DIR = join(OBJECTS_DIR, "blobs");;
+    private static final File COMMITS_DIR = join(OBJECTS_DIR, "commits");;
+    private static final File BRANCHES_DIR = join(GITLET_DIR, "branches");;
+    private static final File RSTAGE_DIR = join(GITLET_DIR, "remove_stage");
+    private static final File HEAD = join(GITLET_DIR, "HEAD");;
 
     public static void init() {
         // create the whole structure of gitlet
@@ -69,7 +66,7 @@ public class Repository {
         Branch br = new Branch("master", com.getCommitID());
         File branch = join(BRANCHES_DIR, "master");
         writeObject(branch, br);
-        writeContents(HEAD, br.name);
+        writeContents(HEAD, br.getName());
     }
 
     public static void add(String filename) {
@@ -90,7 +87,8 @@ public class Repository {
 
         if (getCurrentCommit().hasFile(filename)) {
             // remove the file in staging area if the content in CWD is the same as tracked by current commit
-            if (Arrays.equals(readContents(join(BLOBS_DIR, getCurrentCommit().getFile(filename))), readContents(f))) {
+            if (Arrays.equals(readContents(join(BLOBS_DIR,
+                    getCurrentCommit().getFile(filename))), readContents(f))) {
                 if (fs.exists()) {
                     fs.delete();
                 }
@@ -98,10 +96,6 @@ public class Repository {
             }
         }
         writeContents(fs, readContents(f));
-    }
-
-    private static void copyFile(File source, File dest) throws IOException {
-        Files.copy(source.toPath(), dest.toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
 
 
@@ -114,7 +108,7 @@ public class Repository {
         Branch currentBranch = readObject(currentBranchFile, Branch.class);
 
         // create a new commit with parent previously pointed by HEAD
-        Commit com = new Commit(message, getSpecificCommit(currentBranch.refToCommit));
+        Commit com = new Commit(message, getSpecificCommit(currentBranch.getRefToCommit()));
         File[] files = STAGE_DIR.listFiles();
         File[] rFiles = RSTAGE_DIR.listFiles();
         boolean changed = false;
@@ -145,7 +139,7 @@ public class Repository {
         // let Master branch points to newest commit
         File comFile = join(COMMITS_DIR, com.getCommitID());
         writeObject(comFile, com);
-        currentBranch.refToCommit = com.getCommitID();
+        currentBranch.setRefToCommit(com.getCommitID());
         writeObject(currentBranchFile, currentBranch);
     }
 
@@ -186,11 +180,11 @@ public class Repository {
         // let Master branch points to newest commit
         File comFile = join(COMMITS_DIR, com.getCommitID());
         writeObject(comFile, com);
-        mas.refToCommit = com.getCommitID();
+        mas.setRefToCommit( com.getCommitID());
         writeObject(master, mas);
 
         // HEAD should point to Master
-        writeContents(HEAD, mas.name);
+        writeContents(HEAD, mas.getName());
     }
 
     public static void rm(String filename) {
@@ -219,8 +213,10 @@ public class Repository {
         System.out.println("===");
         System.out.println("commit " + com.getCommitID());
         if (com.getParent2() != null) {
-            System.out.println("Merge: " + com.getParent().getCommitID().substring(0,7) + " " +
-                    com.getParent2().getCommitID().substring(0, 7));
+            System.out.println("Merge: "
+                    + com.getParent().getCommitID().substring(0,7)
+                    + " "
+                    + com.getParent2().getCommitID().substring(0, 7));
         }
         System.out.println("Date: " + com.getTimeStamp());
         System.out.println(com.getMessage());
@@ -254,19 +250,10 @@ public class Repository {
         }
     }
 
-    private static boolean compareFiles(File f1, File f2) throws IOException {
-        Path p1 = f1.toPath();
-        Path p2 = f2.toPath();
-
-        byte[] file1Bytes = Files.readAllBytes(p1);
-        byte[] file2Bytes = Files.readAllBytes(p2);
-        return java.util.Arrays.equals(file1Bytes, file2Bytes);
-    }
-
     private static Commit getCurrentCommit() {
         String branchName = Utils.readContentsAsString(HEAD);
         Branch current = readObject(join(BRANCHES_DIR, branchName), Branch.class);
-        return readObject(join(COMMITS_DIR, current.refToCommit), Commit.class);
+        return readObject(join(COMMITS_DIR, current.getRefToCommit()), Commit.class);
     }
 
     private static Commit getSpecificCommit(String commitID) {
@@ -310,9 +297,9 @@ public class Repository {
             return;
         }
         Branch currentBranch = readObject(currentBr, Branch.class);
-        Commit com = readObject(join(COMMITS_DIR, currentBranch.refToCommit), Commit.class);
+        Commit com = readObject(join(COMMITS_DIR, currentBranch.getRefToCommit()), Commit.class);
         Branch targetBranch = readObject(join(BRANCHES_DIR, branch), Branch.class);
-        Commit targetCom = readObject(join(COMMITS_DIR, targetBranch.refToCommit), Commit.class);
+        Commit targetCom = readObject(join(COMMITS_DIR, targetBranch.getRefToCommit()), Commit.class);
         // check whether there are untracked files in CWD that would result in conflict
         List<String> untracked = getUntracked();
         for (String f : untracked) {
@@ -352,7 +339,7 @@ public class Repository {
         }
 
         // track current branch
-        writeContents(HEAD, targetBranch.name);
+        writeContents(HEAD, targetBranch.getName());
     }
 
 
@@ -476,8 +463,8 @@ public class Repository {
             file.delete();
         }
         Branch currBranch = readObject(join(BRANCHES_DIR, readContentsAsString(HEAD)), Branch.class);
-        currBranch.refToCommit = commitID;
-        File branchFile = join(BRANCHES_DIR, currBranch.name);
+        currBranch.setRefToCommit(commitID);
+        File branchFile = join(BRANCHES_DIR, currBranch.getName());
         writeObject(branchFile, currBranch);
     }
 
@@ -500,7 +487,7 @@ public class Repository {
             return;
         }
         Branch br = readObject(branch, Branch.class);
-        Commit givenCom = readObject(join(COMMITS_DIR,br.refToCommit), Commit.class);
+        Commit givenCom = readObject(join(COMMITS_DIR,br.getRefToCommit()), Commit.class);
         Commit currCom = getCurrentCommit();
         Commit ancestor = getLatestCommonAncestor(givenCom);
         if (ancestor == null) {
@@ -562,7 +549,8 @@ public class Repository {
             }
         }
 
-        mergeCommit("Merged " + branchName + " into " + readContentsAsString(HEAD), currCom, givenCom);
+        mergeCommit("Merged " + branchName + " into "
+                + readContentsAsString(HEAD) + ".", currCom, givenCom);
         if (getConflict) {
             System.out.println("Encountered a merge conflict.");
         }
