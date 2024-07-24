@@ -349,64 +349,15 @@ public class Repository {
 
         // clear staging area
         File[] stageFiles = STAGE_DIR.listFiles();
-        if (stageFiles.length > 0) {
-            if (stageFiles[0].exists()) {
-                restrictedDelete(stageFiles[0]);
-            }
+        assert stageFiles != null;
+        for(File file: stageFiles) {
+            file.delete();
         }
 
         // track current branch
         writeContents(HEAD, targetBranch.name);
     }
 
-    public static void checkoutCommit(String commitID)  {
-
-        Branch currentBranch = readObject(join(BRANCHES_DIR, readContentsAsString(HEAD)), Branch.class);
-        Commit com = readObject(join(COMMITS_DIR, currentBranch.refToCommit), Commit.class);
-
-        Commit targetCom = readObject(join(COMMITS_DIR, commitID), Commit.class);
-        // check whether there are untracked files in CWD
-        List<String> untracked = getUntracked();
-        for (String f : untracked) {
-            if (!com.hasFile(f)) {
-                System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
-                return;
-            }
-        }
-
-        // overwrite files in CWD
-        HashMap<String, String> map = targetCom.getRefs();
-
-        Set<String> processedFiles = new HashSet<>();
-
-        for (Map.Entry<String, String> entry : map.entrySet()) {
-            File fRecorded = join(BLOBS_DIR, entry.getValue());
-            File fCWD = join(CWD, entry.getKey()); // Changed to entry.getKey() for the file name
-            writeContents(fCWD, readContentsAsString(fRecorded));
-            processedFiles.add(fCWD.getName());
-        }
-
-        // Iterate through CWD and delete files not in processedFiles
-        File[] cwdFiles = CWD.listFiles();
-        if (cwdFiles != null) {
-            for (File file : cwdFiles) {
-                if (file.isFile() && !processedFiles.contains(file.getName())) {
-                    file.delete();
-                }
-            }
-        }
-
-        // clear staging area
-        File[] stageFiles = STAGE_DIR.listFiles();
-        if (stageFiles.length > 0) {
-            if (stageFiles[0].exists()) {
-                restrictedDelete(stageFiles[0]);
-            }
-        }
-
-        // track current branch
-        currentBranch.refToCommit = commitID;
-    }
 
     public static void checkoutFileWithID(String commitID, String filename)  {
         File comFile = join(COMMITS_DIR, commitID);
@@ -420,16 +371,7 @@ public class Repository {
             return;
         }
         File f = join(CWD, filename);
-        try {
-            // Ensure the file is created if it doesn't exist
-            if (!f.exists()) {
-                f.createNewFile();
-            }
-            writeContents(f, readContents(join(BLOBS_DIR, com.getFile(filename))));
-        } catch (IOException e) {
-            System.err.println("An error occurred while creating or writing to the file: " + e.getMessage());
-        }
-
+        writeContents(f, readContents(join(BLOBS_DIR, com.getFile(filename))));
     }
 
     public static void find(String message) {
@@ -479,6 +421,9 @@ public class Repository {
         System.out.println("=== Modifications Not Staged For Commit ===");
         System.out.println();
         System.out.println("=== Untracked Files ===");
+        for (String filename: getUntracked()) {
+            System.out.println(filename);
+        }
         System.out.println();
     }
 
@@ -518,7 +463,21 @@ public class Repository {
             System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
             return;
         }
-        checkoutCommit(commitID);
+        for (Map.Entry<String, String> set: com.getRefs().entrySet()) {
+            checkoutFileWithID(commitID, set.getKey());
+        }
+        for (Map.Entry<String, String> set: getCurrentCommit().getRefs().entrySet()) {
+            if (!com.hasFile(set.getKey())) {
+                join(CWD, set.getKey()).delete();
+            }
+        }
+        File[] stageFiles = STAGE_DIR.listFiles();
+        assert stageFiles != null;
+        for(File file: stageFiles) {
+            file.delete();
+        }
+        Branch currBranch = readObject(join(BRANCHES_DIR, readContentsAsString(HEAD)), Branch.class);
+        currBranch.refToCommit = commitID;
     }
 
     public static void merge(String branchName) {
@@ -653,7 +612,8 @@ public class Repository {
         List<String> files = plainFilenamesIn(CWD);
         List<String> untracked = new ArrayList<>();
         for (String fileName: files) {
-            if (!com.hasFile(fileName)) {
+            if (!com.hasFile(fileName) && !join(STAGE_DIR, fileName).exists()
+                    && !join(RSTAGE_DIR, fileName).exists()) {
                 untracked.add(fileName);
             }
         }
