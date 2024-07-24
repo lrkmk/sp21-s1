@@ -478,6 +478,8 @@ public class Repository {
         }
         Branch currBranch = readObject(join(BRANCHES_DIR, readContentsAsString(HEAD)), Branch.class);
         currBranch.refToCommit = commitID;
+        File branchFile = join(BRANCHES_DIR, currBranch.name);
+        writeObject(branchFile, currBranch);
     }
 
     public static void merge(String branchName) {
