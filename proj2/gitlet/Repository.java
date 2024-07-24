@@ -222,7 +222,7 @@ public class Repository {
         System.out.println("===");
         System.out.println("commit " + com.getCommitID());
         if (com.getParent2() != null) {
-            System.out.println("Merge: " + com.getParent().getCommitID().substring(0,7) +
+            System.out.println("Merge: " + com.getParent().getCommitID().substring(0,7) + " " +
                     com.getParent2().getCommitID().substring(0, 7));
         }
         System.out.println("Date: " + com.getTimeStamp());
@@ -233,7 +233,7 @@ public class Repository {
             System.out.println("===");
             System.out.println("commit " + com.getCommitID());
             if (com.getParent2() != null) {
-                System.out.println("Merge: " + com.getParent().getCommitID().substring(0,7) +
+                System.out.println("Merge: " + com.getParent().getCommitID().substring(0,7) + " " +
                         com.getParent2().getCommitID().substring(0, 7));
             }
             System.out.println("Date: " + com.getTimeStamp());
@@ -359,6 +359,55 @@ public class Repository {
         writeContents(HEAD, targetBranch.name);
     }
 
+    public static void checkoutCommit(String commitID)  {
+
+        Branch currentBranch = readObject(join(BRANCHES_DIR, readContentsAsString(HEAD)), Branch.class);
+        Commit com = readObject(join(COMMITS_DIR, currentBranch.refToCommit), Commit.class);
+
+        Commit targetCom = readObject(join(COMMITS_DIR, commitID), Commit.class);
+        // check whether there are untracked files in CWD
+        List<String> untracked = getUntracked();
+        for (String f : untracked) {
+            if (!com.hasFile(f)) {
+                System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                return;
+            }
+        }
+
+        // overwrite files in CWD
+        HashMap<String, String> map = targetCom.getRefs();
+
+        Set<String> processedFiles = new HashSet<>();
+
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            File fRecorded = join(BLOBS_DIR, entry.getValue());
+            File fCWD = join(CWD, entry.getKey()); // Changed to entry.getKey() for the file name
+            writeContents(fCWD, readContentsAsString(fRecorded));
+            processedFiles.add(fCWD.getName());
+        }
+
+        // Iterate through CWD and delete files not in processedFiles
+        File[] cwdFiles = CWD.listFiles();
+        if (cwdFiles != null) {
+            for (File file : cwdFiles) {
+                if (file.isFile() && !processedFiles.contains(file.getName())) {
+                    file.delete();
+                }
+            }
+        }
+
+        // clear staging area
+        File[] stageFiles = STAGE_DIR.listFiles();
+        if (stageFiles.length > 0) {
+            if (stageFiles[0].exists()) {
+                restrictedDelete(stageFiles[0]);
+            }
+        }
+
+        // track current branch
+        currentBranch.refToCommit = commitID;
+    }
+
     public static void checkoutFileWithID(String commitID, String filename)  {
         File comFile = join(COMMITS_DIR, commitID);
         if (!comFile.exists()) {
@@ -469,10 +518,7 @@ public class Repository {
             System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
             return;
         }
-        String branchName = Utils.readContentsAsString(HEAD);
-        Branch current = readObject(join(BRANCHES_DIR, branchName), Branch.class);
-        current.refToCommit = com.getCommitID();
-        checkoutBranch(current.name);
+        checkoutCommit(commitID);
     }
 
     public static void merge(String branchName) {
