@@ -536,7 +536,6 @@ public class Repository {
             return;
         }
         if (getUntracked().size() > 0) {
-            System.out.println(getUntracked().get(0));
             System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
             return;
         }
@@ -592,8 +591,11 @@ public class Repository {
                 // write if changed in different ways
                 if(!currCom.getFile(filename).equals(givenCom.getFile(filename))) {
                     getConflict = true;
-                    writeContents(f, readContentsAsString(join(BLOBS_DIR, currCom.getFile(filename)))+ "=======" +
-                            readContentsAsString(join(BLOBS_DIR, givenCom.getFile(filename))));
+                    writeContents(f, "<<<<<<< HEAD\n" +
+                            readContentsAsString(join(BLOBS_DIR, currCom.getFile(filename)))
+                            + "=======" +
+                            readContentsAsString(join(BLOBS_DIR, givenCom.getFile(filename)))
+                    + ">>>>>>>");
                 }
                 File fs = join(STAGE_DIR, filename);
                 writeContents(fs, readContentsAsString(f));
