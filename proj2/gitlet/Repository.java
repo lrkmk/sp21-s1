@@ -316,10 +316,10 @@ public class Repository {
         Commit com = readObject(join(COMMITS_DIR, currentBranch.refToCommit), Commit.class);
         Branch targetBranch = readObject(join(BRANCHES_DIR, branch), Branch.class);
         Commit targetCom = readObject(join(COMMITS_DIR, targetBranch.refToCommit), Commit.class);
-        // check whether there are untracked files in CWD
+        // check whether there are untracked files in CWD that would result in conflict
         List<String> untracked = getUntracked();
         for (String f : untracked) {
-            if (!com.hasFile(f)) {
+            if (com.hasFile(f)) {
                 System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
                 return;
             }
@@ -459,9 +459,11 @@ public class Repository {
             System.out.println("No commit with that id exists.");
             return;
         }
-        if (getUntracked().size() > 0) {
-            System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
-            return;
+        for (String filename: getUntracked()){
+            if (com.hasFile(filename)) {
+                System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                return;
+            }
         }
         for (Map.Entry<String, String> set: com.getRefs().entrySet()) {
             checkoutFileWithID(commitID, set.getKey());
