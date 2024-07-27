@@ -581,18 +581,18 @@ public class Repository {
                 File f = join(CWD, filename);
                 if (!currCom.hasFile(filename)) {
                     writeContents(f, "<<<<<<< HEAD\n"
-                            + "\n=======\n"
+                            + "=======\n"
                             + readContentsAsString(join(BLOBS_DIR, givenCom.getFile(filename)))
                             + ">>>>>>>");
                 } else if (!givenCom.hasFile(filename)) {
                     writeContents(f, "<<<<<<< HEAD\n"
                             + readContentsAsString(join(BLOBS_DIR, currCom.getFile(filename)))
-                            + "\n=======\n"
+                            + "=======\n"
                             + ">>>>>>>");
                 } else {
                     writeContents(f, "<<<<<<< HEAD\n"
                             + readContentsAsString(join(BLOBS_DIR, currCom.getFile(filename)))
-                            + "\n=======\n"
+                            + "=======\n"
                             + readContentsAsString(join(BLOBS_DIR, givenCom.getFile(filename)))
                             + ">>>>>>>");
                 }
@@ -600,9 +600,9 @@ public class Repository {
         }
 
         if (getConflict) {
-        System.out.println("Encountered a merge conflict.");
+            System.out.println("Encountered a merge conflict.");
+        }
     }
-}
 
     private static Commit getLatestCommonAncestor(Commit com) {
         Commit currCom = getCurrentCommit();
