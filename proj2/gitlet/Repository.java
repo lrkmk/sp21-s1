@@ -583,18 +583,18 @@ public class Repository {
                     writeContents(f, "<<<<<<< HEAD\n"
                             + "=======\n"
                             + readContentsAsString(join(BLOBS_DIR, givenCom.getFile(filename)))
-                            + ">>>>>>>");
+                            + ">>>>>>>\n");
                 } else if (!givenCom.hasFile(filename)) {
                     writeContents(f, "<<<<<<< HEAD\n"
                             + readContentsAsString(join(BLOBS_DIR, currCom.getFile(filename)))
                             + "=======\n"
-                            + ">>>>>>>");
+                            + ">>>>>>>\n");
                 } else {
                     writeContents(f, "<<<<<<< HEAD\n"
                             + readContentsAsString(join(BLOBS_DIR, currCom.getFile(filename)))
                             + "=======\n"
                             + readContentsAsString(join(BLOBS_DIR, givenCom.getFile(filename)))
-                            + ">>>>>>>");
+                            + ">>>>>>>\n");
                 }
             }
         }
