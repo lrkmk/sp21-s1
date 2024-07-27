@@ -479,7 +479,8 @@ public class Repository {
             return;
         }
         if (getUntracked().size() > 0) {
-            System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+            System.out.println("There is an untracked file in the way; "
+                    + "delete it, or add and commit it first.");
             return;
         }
         Branch br = readObject(branch, Branch.class);
@@ -498,7 +499,9 @@ public class Repository {
             checkoutBranch(branchName);
             return;
         }
+
         boolean getConflict = false;
+
         for (Map.Entry<String, String> givenEntry : givenCom.getRefs().entrySet()) {
             // if files are modified in given branch
             // since the split point but not modified in current branch
@@ -521,6 +524,7 @@ public class Repository {
             }
 
         }
+
         for (Map.Entry<String, String> currEntry : currCom.getRefs().entrySet()) {
             if (ancestor.hasFile(currEntry.getKey()) && !givenCom.hasFile(currEntry.getKey())
                     && ancestor.getFile(currEntry.getKey()).equals(currEntry.getValue())) {
@@ -535,7 +539,7 @@ public class Repository {
             for (String filename: intersection) {
                 File f = join(CWD, filename);
                 // write if changed in different ways
-                if(!currCom.getFile(filename).equals(givenCom.getFile(filename))) {
+                if (!currCom.getFile(filename).equals(givenCom.getFile(filename))) {
                     getConflict = true;
                     writeContents(f, "<<<<<<< HEAD\n"
                             + readContentsAsString(join(BLOBS_DIR, currCom.getFile(filename)))
@@ -561,8 +565,17 @@ public class Repository {
 
         Set<String> commonKeys = new HashSet<>(keys1);
         commonKeys.retainAll(keys2);
-        return  commonKeys;
+
+        Set<String> diffValueKeys = new HashSet<>();
+        for (String key : commonKeys) {
+            if (!currCom.getRefs().get(key).equals(givenCom.getRefs().get(key))) {
+                diffValueKeys.add(key);
+            }
+        }
+
+        return diffValueKeys;
     }
+
 
     private static Commit getLatestCommonAncestor(Commit com) {
         Commit currCom = getCurrentCommit();
