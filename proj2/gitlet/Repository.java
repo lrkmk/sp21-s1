@@ -500,8 +500,6 @@ public class Repository {
             return;
         }
 
-        boolean getConflict = false;
-
         for (Map.Entry<String, String> givenEntry : givenCom.getRefs().entrySet()) {
             // if files are modified in given branch
             // since the split point but not modified in current branch
@@ -534,48 +532,77 @@ public class Repository {
         }
 
         // check for conflicts
-        Set<String> intersection = getStrings(currCom, givenCom);
-        if (!intersection.isEmpty()) {
-            for (String filename: intersection) {
-                File f = join(CWD, filename);
-                // write if changed in different ways
-                if (!currCom.getFile(filename).equals(givenCom.getFile(filename))) {
-                    getConflict = true;
-                    writeContents(f, "<<<<<<< HEAD\n"
-                            + readContentsAsString(join(BLOBS_DIR, currCom.getFile(filename)))
-                            + "=======\n"
-                            + readContentsAsString(join(BLOBS_DIR, givenCom.getFile(filename)))
-                            + ">>>>>>>");
-                }
-                File fs = join(STAGE_DIR, filename);
-                writeContents(fs, readContentsAsString(f));
-            }
-        }
+        Set<String> conflict = getConflict(currCom, givenCom, ancestor);
+        handleConflict(conflict, currCom, givenCom);
+
 
         mergeCommit("Merged " + branchName + " into "
                 + readContentsAsString(HEAD) + ".", currCom, givenCom);
-        if (getConflict) {
-            System.out.println("Encountered a merge conflict.");
-        }
+
     }
 
-    private static Set<String> getStrings(Commit currCom, Commit givenCom) {
+    private static Set<String> getConflict(Commit currCom, Commit givenCom, Commit ancestor) {
         Set<String> keys1 = new HashSet<>(currCom.getRefs().keySet());
         Set<String> keys2 = new HashSet<>(givenCom.getRefs().keySet());
 
         Set<String> commonKeys = new HashSet<>(keys1);
         commonKeys.retainAll(keys2);
+        Set<String> uniqueKeys1 = new HashSet<>(keys1);
+        Set<String> uniqueKeys2 = new HashSet<>(keys2);
+        uniqueKeys1.removeAll(commonKeys);
+        uniqueKeys2.removeAll(commonKeys);
+        uniqueKeys1.addAll(uniqueKeys2);
 
-        Set<String> diffValueKeys = new HashSet<>();
+        Set<String> conflictValueKeys = new HashSet<>();
         for (String key : commonKeys) {
             if (!currCom.getRefs().get(key).equals(givenCom.getRefs().get(key))) {
-                diffValueKeys.add(key);
+                conflictValueKeys.add(key);
             }
         }
 
-        return diffValueKeys;
+        for (String key : uniqueKeys1) {
+            if (ancestor.hasFile(key) && currCom.hasFile(key)
+                    && !currCom.getFile(key).equals(ancestor.getFile(key))) {
+                conflictValueKeys.add(key);
+            } else if (ancestor.hasFile(key) && givenCom.hasFile(key)
+                    && !givenCom.getFile(key).equals(ancestor.getFile(key))) {
+                conflictValueKeys.add(key);
+            }
+        }
+
+        return conflictValueKeys;
     }
 
+    private static void handleConflict(Set<String> set, Commit currCom, Commit givenCom) {
+        boolean getConflict = false;
+        if (!set.isEmpty()) {
+            getConflict = true;
+            for (String filename: set) {
+                File f = join(CWD, filename);
+                if (!currCom.hasFile(filename)) {
+                    writeContents(f, "<<<<<<< HEAD\n"
+                            + "\n=======\n"
+                            + readContentsAsString(join(BLOBS_DIR, givenCom.getFile(filename)))
+                            + ">>>>>>>");
+                } else if (!givenCom.hasFile(filename)) {
+                    writeContents(f, "<<<<<<< HEAD\n"
+                            + readContentsAsString(join(BLOBS_DIR, currCom.getFile(filename)))
+                            + "\n=======\n"
+                            + ">>>>>>>");
+                } else {
+                    writeContents(f, "<<<<<<< HEAD\n"
+                            + readContentsAsString(join(BLOBS_DIR, currCom.getFile(filename)))
+                            + "\n=======\n"
+                            + readContentsAsString(join(BLOBS_DIR, givenCom.getFile(filename)))
+                            + ">>>>>>>");
+                }
+            }
+        }
+
+        if (getConflict) {
+        System.out.println("Encountered a merge conflict.");
+    }
+}
 
     private static Commit getLatestCommonAncestor(Commit com) {
         Commit currCom = getCurrentCommit();
