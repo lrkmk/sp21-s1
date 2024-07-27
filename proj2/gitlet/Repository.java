@@ -3,9 +3,6 @@ package gitlet;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 import static gitlet.Utils.*;
@@ -41,7 +38,8 @@ public class Repository {
     public static void init() {
         // create the whole structure of gitlet
         if (GITLET_DIR.exists()) {
-            System.out.println("A Gitlet version-control system already exists in the current directory.");
+            System.out.println(
+                    "A Gitlet version-control system already exists in the current directory.");
             return;
         }
         GITLET_DIR.mkdir();
@@ -86,7 +84,8 @@ public class Repository {
         }
 
         if (getCurrentCommit().hasFile(filename)) {
-            // remove the file in staging area if the content in CWD is the same as tracked by current commit
+            // remove the file in staging area if the content
+            // in CWD is the same as tracked by current commit
             if (Arrays.equals(readContents(join(BLOBS_DIR,
                     getCurrentCommit().getFile(filename))), readContents(f))) {
                 if (fs.exists()) {
@@ -112,7 +111,7 @@ public class Repository {
         File[] files = STAGE_DIR.listFiles();
         File[] rFiles = RSTAGE_DIR.listFiles();
         boolean changed = false;
-        if (files != null && files.length != 0 ) {
+        if (files != null && files.length != 0) {
             changed = true;
             for (File file : files) {
                 String fileID = sha1(readContents(file));
@@ -152,7 +151,7 @@ public class Repository {
         File[] files = STAGE_DIR.listFiles();
         File[] rFiles = RSTAGE_DIR.listFiles();
         boolean flag = false;
-        if (files != null && files.length != 0 ) {
+        if (files != null && files.length != 0) {
             flag = true;
             for (File file : files) {
                 String fileID = sha1(readContents(file));
@@ -180,7 +179,7 @@ public class Repository {
         // let Master branch points to newest commit
         File comFile = join(COMMITS_DIR, com.getCommitID());
         writeObject(comFile, com);
-        mas.setRefToCommit( com.getCommitID());
+        mas.setRefToCommit(com.getCommitID());
         writeObject(master, mas);
 
         // HEAD should point to Master
@@ -214,7 +213,7 @@ public class Repository {
         System.out.println("commit " + com.getCommitID());
         if (com.getParent2() != null) {
             System.out.println("Merge: "
-                    + com.getParent().getCommitID().substring(0,7)
+                    + com.getParent().getCommitID().substring(0, 7)
                     + " "
                     + com.getParent2().getCommitID().substring(0, 7));
         }
@@ -226,8 +225,10 @@ public class Repository {
             System.out.println("===");
             System.out.println("commit " + com.getCommitID());
             if (com.getParent2() != null) {
-                System.out.println("Merge: " + com.getParent().getCommitID().substring(0,7) + " " +
-                        com.getParent2().getCommitID().substring(0, 7));
+                System.out.println("Merge: "
+                        + com.getParent().getCommitID().substring(0, 7)
+                        + " "
+                        + com.getParent2().getCommitID().substring(0, 7));
             }
             System.out.println("Date: " + com.getTimeStamp());
             System.out.println(com.getMessage());
@@ -271,16 +272,7 @@ public class Repository {
             return;
         }
         File f = join(CWD, filename);
-        try {
-            // Ensure the file is created if it doesn't exist
-            if (!f.exists()) {
-                f.createNewFile();
-            }
-            writeContents(f, readContents(join(BLOBS_DIR, com.getFile(filename))));
-        } catch (IOException e) {
-            System.err.println("An error occurred while creating or writing to the file: " + e.getMessage());
-        }
-
+        writeContents(f, readContents(join(BLOBS_DIR, com.getFile(filename))));
 
     }
 
@@ -299,12 +291,14 @@ public class Repository {
         Branch currentBranch = readObject(currentBr, Branch.class);
         Commit com = readObject(join(COMMITS_DIR, currentBranch.getRefToCommit()), Commit.class);
         Branch targetBranch = readObject(join(BRANCHES_DIR, branch), Branch.class);
-        Commit targetCom = readObject(join(COMMITS_DIR, targetBranch.getRefToCommit()), Commit.class);
+        Commit targetCom = readObject(join(COMMITS_DIR, targetBranch.getRefToCommit()),
+                Commit.class);
         // check whether there are untracked files in CWD that would result in conflict
         List<String> untracked = getUntracked();
         for (String f : untracked) {
             if (targetCom.hasFile(f)) {
-                System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                System.out.println("There is an untracked file in the way;"
+                        + " delete it, or add and commit it first.");
                 return;
             }
         }
@@ -334,7 +328,7 @@ public class Repository {
         // clear staging area
         File[] stageFiles = STAGE_DIR.listFiles();
         assert stageFiles != null;
-        for(File file: stageFiles) {
+        for (File file: stageFiles) {
             file.delete();
         }
 
@@ -368,7 +362,7 @@ public class Repository {
                 flag = true;
             }
         }
-        if (flag == false) {
+        if (!flag) {
             System.out.println("Found no commit with that message.");
         }
     }
@@ -443,9 +437,10 @@ public class Repository {
             System.out.println("No commit with that id exists.");
             return;
         }
-        for (String filename: getUntracked()){
+        for (String filename: getUntracked()) {
             if (com.hasFile(filename)) {
-                System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                System.out.println("There is an untracked file in the way; delete it,"
+                        + "or add and commit it first.");
                 return;
             }
         }
@@ -459,10 +454,11 @@ public class Repository {
         }
         File[] stageFiles = STAGE_DIR.listFiles();
         assert stageFiles != null;
-        for(File file: stageFiles) {
+        for (File file: stageFiles) {
             file.delete();
         }
-        Branch currBranch = readObject(join(BRANCHES_DIR, readContentsAsString(HEAD)), Branch.class);
+        Branch currBranch = readObject(join(BRANCHES_DIR,
+                readContentsAsString(HEAD)), Branch.class);
         currBranch.setRefToCommit(commitID);
         File branchFile = join(BRANCHES_DIR, currBranch.getName());
         writeObject(branchFile, currBranch);
@@ -487,7 +483,7 @@ public class Repository {
             return;
         }
         Branch br = readObject(branch, Branch.class);
-        Commit givenCom = readObject(join(COMMITS_DIR,br.getRefToCommit()), Commit.class);
+        Commit givenCom = readObject(join(COMMITS_DIR, br.getRefToCommit()), Commit.class);
         Commit currCom = getCurrentCommit();
         Commit ancestor = getLatestCommonAncestor(givenCom);
         if (ancestor == null) {
@@ -504,9 +500,12 @@ public class Repository {
         }
         boolean getConflict = false;
         for (Map.Entry<String, String> givenEntry : givenCom.getRefs().entrySet()) {
-            // if files are modified in given branch since the split point but not modified in current branch
-            if (ancestor.hasFile(givenEntry.getKey()) && !givenEntry.getValue().equals(ancestor.getFile(givenEntry.getKey()))
-                && ancestor.getFile(givenEntry.getKey()).equals(currCom.getFile(givenEntry.getKey()))) {
+            // if files are modified in given branch
+            // since the split point but not modified in current branch
+            if (ancestor.hasFile(givenEntry.getKey())
+                    && !givenEntry.getValue().equals(ancestor.getFile(givenEntry.getKey()))
+                    && ancestor.getFile(givenEntry.getKey()).
+                    equals(currCom.getFile(givenEntry.getKey()))) {
                 checkoutFileWithID(currCom.getCommitID(), givenEntry.getKey());
                 // stage files differing from ancestor's record
                 File f = join(BLOBS_DIR, givenEntry.getValue());
@@ -523,26 +522,26 @@ public class Repository {
 
         }
         for (Map.Entry<String, String> currEntry : currCom.getRefs().entrySet()) {
-            if (ancestor.hasFile(currEntry.getKey()) && !givenCom.hasFile(currEntry.getKey()) &&
-                    ancestor.getFile(currEntry.getKey()).equals(currEntry.getValue())) {
+            if (ancestor.hasFile(currEntry.getKey()) && !givenCom.hasFile(currEntry.getKey())
+                    && ancestor.getFile(currEntry.getKey()).equals(currEntry.getValue())) {
                 rm(currEntry.getKey());
                 join(CWD, currEntry.getKey()).delete();
             }
         }
 
         // check for conflicts
-        Set<String> intersection= getStrings(currCom, givenCom);
+        Set<String> intersection = getStrings(currCom, givenCom);
         if (!intersection.isEmpty()) {
             for (String filename: intersection) {
                 File f = join(CWD, filename);
                 // write if changed in different ways
                 if(!currCom.getFile(filename).equals(givenCom.getFile(filename))) {
                     getConflict = true;
-                    writeContents(f, "<<<<<<< HEAD\n" +
-                            readContentsAsString(join(BLOBS_DIR, currCom.getFile(filename)))
-                            + "=======\n" +
-                            readContentsAsString(join(BLOBS_DIR, givenCom.getFile(filename)))
-                    + ">>>>>>>");
+                    writeContents(f, "<<<<<<< HEAD\n"
+                            + readContentsAsString(join(BLOBS_DIR, currCom.getFile(filename)))
+                            + "=======\n"
+                            + readContentsAsString(join(BLOBS_DIR, givenCom.getFile(filename)))
+                            + ">>>>>>>");
                 }
                 File fs = join(STAGE_DIR, filename);
                 writeContents(fs, readContentsAsString(f));

@@ -80,7 +80,7 @@ public class Commit implements Serializable {
         return commitID;
     }
 
-    public HashMap<String,String> getRefs() {
+    public HashMap<String, String> getRefs() {
         return refs;
     }
 
