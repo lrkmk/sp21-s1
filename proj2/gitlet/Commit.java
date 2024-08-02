@@ -116,12 +116,10 @@ public class Commit implements Serializable {
     }
 
     @Override
-    public boolean equals(Object object)
-    {
+    public boolean equals(Object object) {
         boolean sameSame = false;
 
-        if (object instanceof Commit)
-        {
+        if (object instanceof Commit) {
             sameSame = Objects.equals(this.commitID, ((Commit) object).commitID);
         }
 

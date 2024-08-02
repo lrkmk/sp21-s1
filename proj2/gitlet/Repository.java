@@ -513,7 +513,7 @@ public class Repository {
                     && !givenEntry.getValue().equals(ancestor.getFile(givenEntry.getKey()))
                     && ancestor.getFile(givenEntry.getKey()).
                     equals(currCom.getFile(givenEntry.getKey()))) {
-                checkoutFileWithID(currCom.getCommitID(), givenEntry.getKey());
+                checkoutFileWithID(givenCom.getCommitID(), givenEntry.getKey());
                 // stage files differing from ancestor's record
                 File f = join(BLOBS_DIR, givenEntry.getValue());
                 File fStage = join(STAGE_DIR, givenEntry.getKey());
@@ -561,11 +561,12 @@ public class Repository {
 
         Set<String> conflictValueKeys = new HashSet<>();
         for (String key : commonKeys) {
-            if (!currCom.getRefs().get(key).equals(givenCom.getRefs().get(key))) {
+            if (!currCom.getRefs().get(key).equals(givenCom.getRefs().get(key))
+                    && !ancestor.getRefs().get(key).equals(givenCom.getRefs().get(key))
+                    && !ancestor.getRefs().get(key).equals(currCom.getRefs().get(key))) {
                 conflictValueKeys.add(key);
             }
         }
-
         for (String key : uniqueKeys1) {
             if (ancestor.hasFile(key) && currCom.hasFile(key)
                     && !currCom.getFile(key).equals(ancestor.getFile(key))) {
