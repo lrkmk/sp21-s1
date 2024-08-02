@@ -61,7 +61,7 @@ public class Commit implements Serializable {
         return  parent1.getCommitID();
     }
 
-    public Commit getParent() {
+    public Commit getParent1() {
         return parent1;
     }
 
@@ -109,5 +109,23 @@ public class Commit implements Serializable {
         SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss yyyy Z", Locale.ENGLISH);
         sdf.setTimeZone(TimeZone.getTimeZone("America/Los_Angeles")); // Set time zone
         return sdf.format(timeStamp);
+    }
+
+    @Override
+    public boolean equals(Object object)
+    {
+        boolean sameSame = false;
+
+        if (object instanceof Commit)
+        {
+            sameSame = Objects.equals(this.commitID, ((Commit) object).commitID);
+        }
+
+        return sameSame;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(commitID);
     }
 }

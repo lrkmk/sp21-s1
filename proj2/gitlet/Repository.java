@@ -213,7 +213,7 @@ public class Repository {
         System.out.println("commit " + com.getCommitID());
         if (com.getParent2() != null) {
             System.out.println("Merge: "
-                    + com.getParent().getCommitID().substring(0, 7)
+                    + com.getParent1().getCommitID().substring(0, 7)
                     + " "
                     + com.getParent2().getCommitID().substring(0, 7));
         }
@@ -226,7 +226,7 @@ public class Repository {
             System.out.println("commit " + com.getCommitID());
             if (com.getParent2() != null) {
                 System.out.println("Merge: "
-                        + com.getParent().getCommitID().substring(0, 7)
+                        + com.getParent1().getCommitID().substring(0, 7)
                         + " "
                         + com.getParent2().getCommitID().substring(0, 7));
             }
@@ -338,6 +338,12 @@ public class Repository {
 
 
     public static void checkoutFileWithID(String commitID, String filename)  {
+        String[] fileList = COMMITS_DIR.list();
+        for (String str : fileList) {
+            if (str.startsWith(commitID)) {
+                commitID = str;
+            }
+        }
         File comFile = join(COMMITS_DIR, commitID);
         if (!comFile.exists()) {
             System.out.println("No commit with that id exists.");
@@ -604,35 +610,59 @@ public class Repository {
         }
     }
 
-    private static Commit getLatestCommonAncestor(Commit com) {
+    public static Commit getLatestCommonAncestor(Commit com) {
         Commit currCom = getCurrentCommit();
-        List<Commit> currAncestors = new ArrayList<>();
-        List<Commit> givenAncestors = new ArrayList<>();
+        Set<Commit> currParent = new HashSet<>();
+        Set<Commit> givenParent = new HashSet<>();
 
-        // Collect all ancestors of the current commit
-        while (currCom.getParent() != null) {
-            currAncestors.add(currCom);
-            currCom = currCom.getParent();
-        }
-        currAncestors.add(currCom);
-
-        // Collect all ancestors of the given commit
-        while (com.getParent() != null) {
-            givenAncestors.add(com);
-            com = com.getParent();
-        }
-        givenAncestors.add(com);
-
-        // Find the latest common ancestor by iterating through the ancestors lists
-        for (Commit currA : currAncestors) {
-            for (Commit givenA : givenAncestors) {
-                if (Objects.equals(currA.getCommitID(), givenA.getCommitID())) {
-                    return currA;
-                }
+        Queue<Commit> queue = new ArrayDeque<>();
+        queue.add(currCom);
+        while (!queue.isEmpty()) {
+            Commit current = queue.poll();
+            currParent.add(current);
+            if (current.getParent1() != null) {
+                queue.add(current.getParent1());
+            }
+            if (current.getParent2() != null) {
+                queue.add(current.getParent2());
             }
         }
 
-        return null; // No common ancestor found
+        queue.add(com);
+        while (!queue.isEmpty()) {
+            Commit current = queue.poll();
+            givenParent.add(current);
+            if (current.getParent1() != null) {
+                queue.add(current.getParent1());
+            }
+            if (current.getParent2() != null) {
+                queue.add(current.getParent2());
+            }
+        }
+
+
+        Set<Commit> intersection = findIntersection(currParent, givenParent);
+
+        return Collections.min(intersection, Comparator.comparing(Commit::getTimeStamp));
+    }
+
+    public static Set<Commit> findIntersection(Set<Commit> set1, Set<Commit> set2) {
+        Map<String, Commit> idToCommitMap = new HashMap<>();
+        Set<Commit> intersection = new HashSet<>();
+
+        // Populate the map with commits from the first set
+        for (Commit commit : set1) {
+            idToCommitMap.put(commit.getCommitID(), commit);
+        }
+
+        // Check for intersection based on commit IDs
+        for (Commit commit : set2) {
+            if (idToCommitMap.containsKey(commit.getCommitID())) {
+                intersection.add(commit);
+            }
+        }
+
+        return intersection;
     }
 
     private static List<String> getUntracked() {
