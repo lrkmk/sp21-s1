@@ -73,7 +73,11 @@ public class Commit implements Serializable {
     }
 
     public String getTimeStamp() {
-        return  getFormattedDate();
+        return getFormattedDate();
+    }
+
+    public Date getDate() {
+        return timeStamp;
     }
 
     public String getCommitID() {

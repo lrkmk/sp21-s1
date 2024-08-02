@@ -643,7 +643,7 @@ public class Repository {
 
         Set<Commit> intersection = findIntersection(currParent, givenParent);
 
-        return Collections.min(intersection, Comparator.comparing(Commit::getTimeStamp));
+        return Collections.max(intersection, Comparator.comparing(Commit::getDate));
     }
 
     public static Set<Commit> findIntersection(Set<Commit> set1, Set<Commit> set2) {
